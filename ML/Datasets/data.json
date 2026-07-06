@@ -2,7 +2,7 @@
     {
         "Dataset Name": "Helmet Detection Project",
         "Purpose": "Helmet Detection",
-        "Source/Link": "https://universe.roboflow.com/nckh-2023/helmet-detection-project"
+        "Source/Link": "https://drive.google.com/drive/folders/1K7p0QynTFCbDNQR_RgdsKWjbsTzmc-i1?usp=sharing"
     },
     {
         "Dataset Name": "Motorcycle-Rider Dataset",
@@ -15,9 +15,9 @@
         "Source/Link": "https://universe.roboflow.com/harshas-workspace/triple-ride-detection"
     },
     {
-        "Dataset Name": "License Plate Recognition Dataset",
+        "Dataset Name": "License Plate Detection",
         "Purpose": "Number Plate Detection",
-        "Source/Link": "https://universe.roboflow.com/roboflow-universe-projects/license-plate-recognition-rxg4e"
+        "Source/Link": "https://drive.google.com/drive/folders/1UpJuaM2AQtrsBRvU28XgOg3kmwVNYJVK?usp=drive_link"
     },
     {
         "Dataset Name": "License Plate Recognition (OCR) Dataset",
