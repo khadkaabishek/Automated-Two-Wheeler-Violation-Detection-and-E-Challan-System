@@ -50,7 +50,7 @@ Supporting design artifacts (see project report for diagrams): Use Case Diagram,
 | Layer | Technology |
 |---|---|
 | Frontend | React, Tailwind CSS |
-| Backend | Node.js / Express.js (dashboard/API described as FastAPI in places of the report) |
+| Backend | FastAPI |
 | Database | SQL (relational) |
 | Object Detection | YOLOv8 (YOLO family) |
 | Tracking | ByteTrack / DeepSORT |
@@ -59,7 +59,6 @@ Supporting design artifacts (see project report for diagrams): Use Case Diagram,
 | Notifications | Email gateway (SMS/Email with secure payment link) |
 | Deployment | GPU acceleration; optional edge deployment (e.g., NVIDIA Jetson) |
 
-> Note: The project report references both FastAPI and Node.js/Express for the backend in different sections — confirm and standardize on one before implementation.
 
 ## Datasets Used
 
@@ -74,7 +73,7 @@ Supporting design artifacts (see project report for diagrams): Use Case Diagram,
 
 Data split: 70% training / 20% validation / 10% testing, with augmentation (flipping, rotation, brightness, scaling, cropping).
 
-## Functional Requirements (Summary)
+## Functional Requirements 
 
 - Real-time video ingestion from distributed cameras
 - Automated violation screening (helmet, triple riding, etc.)
@@ -82,7 +81,7 @@ Data split: 70% training / 20% validation / 10% testing, with augmentation (flip
 - Challan suggestion with fine calculation and admin review/approval
 - Automated SMS/Email notifications with secure payment links
 
-## Non-Functional Requirements (Summary)
+## Non-Functional Requirements 
 
 - Inference latency under 30ms per frame
 - ANPR accuracy ≥ 95% across day/night/adverse weather
