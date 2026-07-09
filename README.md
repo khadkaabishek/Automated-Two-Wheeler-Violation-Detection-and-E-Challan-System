@@ -147,5 +147,3 @@ This project demonstrates the design and architecture of an intelligent, end-to-
 See the full project report for the complete list of cited works on helmet violation detection, triple-riding detection, mobile phone usage detection, and ANPR systems.
 
 ---
-
-*This README is derived from the project's minor project report ("Automated Two-Wheeler Violation Detection and E-Challan System"). Update the sections above (setup/installation, usage, folder structure, API endpoints) once implementation details are finalized.*
