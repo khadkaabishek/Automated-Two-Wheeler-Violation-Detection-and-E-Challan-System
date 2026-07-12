@@ -50,7 +50,7 @@ Supporting design artifacts (see project report for diagrams): Use Case Diagram,
 | Layer | Technology |
 |---|---|
 | Frontend | React, Tailwind CSS |
-| Backend | FastAPI |
+| Backend | Node.js / Express.js (dashboard/API described as FastAPI in places of the report) |
 | Database | SQL (relational) |
 | Object Detection | YOLOv8 (YOLO family) |
 | Tracking | ByteTrack / DeepSORT |
@@ -73,6 +73,7 @@ Supporting design artifacts (see project report for diagrams): Use Case Diagram,
 
 Data split: 70% training / 20% validation / 10% testing, with augmentation (flipping, rotation, brightness, scaling, cropping).
 
+
 ## Functional Requirements 
 
 - Real-time video ingestion from distributed cameras
@@ -80,6 +81,7 @@ Data split: 70% training / 20% validation / 10% testing, with augmentation (flip
 - Targeted ANPR triggered only after a violation is validated
 - Challan suggestion with fine calculation and admin review/approval
 - Automated SMS/Email notifications with secure payment links
+
 
 ## Non-Functional Requirements 
 
@@ -145,4 +147,4 @@ This project demonstrates the design and architecture of an intelligent, end-to-
 
 See the full project report for the complete list of cited works on helmet violation detection, triple-riding detection, mobile phone usage detection, and ANPR systems.
 
----
+
