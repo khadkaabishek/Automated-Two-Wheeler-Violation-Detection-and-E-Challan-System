@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   BarChart3,
@@ -8,54 +8,85 @@ import {
   ShieldCheck,
   Video,
   Moon,
-  Sun
+  Sun,
+  LogIn,
+  LogOut
 } from "lucide-react";
 
 export function MainLayout() {
   const location = useLocation();
-  const [isLightMode, setIsLightMode] = useState(false);
+  const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    if (isLightMode) {
-      document.documentElement.classList.add("light");
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("light");
+      document.documentElement.classList.remove("dark");
     }
-  }, [isLightMode]);
+  }, [isDarkMode]);
 
-  const toggleTheme = () => setIsLightMode(!isLightMode);
+  const toggleTheme = () => setIsDarkMode(!isDarkMode);
+
+  const email = localStorage.getItem("userEmail") || "officer.id@morth.gov.in";
+
+  const getDisplayName = (emailStr) => {
+    const namePart = emailStr.split('@')[0];
+    return namePart
+      .split('.')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(n => n.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const displayName = getDisplayName(email);
+  const initials = getInitials(displayName);
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userEmail");
+    navigate("/", { replace: true });
+  };
 
   const getLinkClass = (path) => {
     const isActive = location.pathname === path;
     if (isActive) {
-      return "relative rounded-lg bg-[#1C2535] flex px-3 py-2.5 items-center gap-3 font-medium text-gray-300 text-[13px]";
+      return "relative rounded-lg bg-secondary flex px-3 py-2.5 items-center gap-3 font-semibold text-primary text-[13px]";
     }
-    return "rounded-lg flex px-3 py-2.5 items-center gap-3 text-gray-500 text-[13px]";
+    return "rounded-lg flex px-3 py-2.5 items-center gap-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors text-[13px]";
   };
 
   const getIconClass = (path) => {
-    return location.pathname === path ? "size-4 text-[#2A6B7C]" : "size-4 text-gray-500";
+    return location.pathname === path ? "size-4 text-primary" : "size-4 text-muted-foreground";
   };
 
   return (
-    <div className="bg-zinc-950 text-neutral-50 flex w-full min-h-screen">
-      <aside className="shrink-0 bg-[#0D1017] border-[#1E2530] border-t-0 border-r-1 border-b-0 border-l-0 border-solid flex p-4 flex-col gap-6 w-55">
+    <div className="bg-background text-foreground flex w-full min-h-screen">
+      <aside className="shrink-0 bg-card border-r border-border flex p-4 flex-col gap-6 w-55">
         <div className="flex px-2 pt-2 items-center gap-2">
-          <div className="size-9 rounded-xl bg-[#1C2535] flex justify-center items-center">
-            <ShieldCheck className="size-5 text-[#6B8A99]" />
+          <div className="size-9 rounded-xl bg-secondary flex justify-center items-center">
+            <ShieldCheck className="size-5 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="leading-tight font-semibold text-gray-400 text-sm leading-5">
+            <span className="leading-tight font-semibold text-foreground text-sm leading-5">
               VisionGuard
             </span>
-            <span className="leading-tight text-[#4A5568] text-[11px]">
+            <span className="leading-tight text-muted-foreground text-[11px]">
               AI Enforcement
             </span>
           </div>
         </div>
         <nav className="flex flex-col gap-1">
-          <Link to="/" className={getLinkClass("/")}>
-            <LayoutDashboard className={getIconClass("/")} />
+          <Link to="/dashboard" className={getLinkClass("/dashboard")}>
+            <LayoutDashboard className={getIconClass("/dashboard")} />
             <span>Dashboard</span>
           </Link>
           <Link to="/live-monitoring" className={getLinkClass("/live-monitoring")}>
@@ -74,32 +105,45 @@ export function MainLayout() {
             <BarChart3 className={getIconClass("/analytics")} />
             <span>Analytics</span>
           </Link>
+          <Link to="/" className={getLinkClass("/")}>
+            <LogIn className={getIconClass("/")} />
+            <span>Login Portal</span>
+          </Link>
         </nav>
         <div className="flex flex-col gap-2 mt-auto">
           <button 
             onClick={toggleTheme}
-            className="rounded-xl bg-[#0F1115] border-[#1E2530] border-1 border-solid flex p-3 items-center justify-center gap-3 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            className="rounded-xl bg-background border border-border flex p-3 items-center justify-center gap-3 text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all cursor-pointer"
           >
-            {isLightMode ? <Moon className="size-4" /> : <Sun className="size-4" />}
-            <span className="text-[13px] font-medium">{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
+            {isDarkMode ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            <span className="text-[13px] font-medium">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
           
-          <div className="rounded-xl bg-[#0F1115] border-[#1E2530] border-1 border-solid flex p-3 items-center gap-3">
-            <div className="size-9 rounded-full bg-[#1E2A38] flex justify-center items-center">
-              <span className="font-medium text-gray-400 text-xs">RS</span>
+          <div className="rounded-xl bg-background border border-border flex p-3 items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-full bg-secondary flex justify-center items-center">
+                <span className="font-semibold text-primary text-xs">{initials}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="leading-tight text-foreground text-[13px] font-semibold truncate max-w-[120px]" title={displayName}>
+                  {displayName}
+                </span>
+                <span className="leading-tight text-muted-foreground text-[11px]">
+                  Traffic Officer
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="leading-tight text-gray-400 text-[13px]">
-                Insp. R. Sharma
-              </span>
-              <span className="leading-tight text-[#4A5568] text-[11px]">
-                Traffic Officer
-              </span>
-            </div>
+            <button 
+              onClick={handleLogout} 
+              className="text-muted-foreground hover:text-destructive transition-colors p-1 cursor-pointer" 
+              title="Sign Out"
+            >
+              <LogOut className="size-4" />
+            </button>
           </div>
         </div>
       </aside>
-      <main className="bg-[#0F1115] flex flex-col flex-1 h-screen overflow-y-auto">
+      <main className="bg-background flex flex-col flex-1 h-screen overflow-y-auto">
         <Outlet />
       </main>
     </div>
