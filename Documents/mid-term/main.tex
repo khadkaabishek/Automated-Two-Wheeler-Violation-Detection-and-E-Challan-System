@@ -1,0 +1,345 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{tabularx}
+
+\geometry{
+  left=1.5in,
+  right=1in,
+  top=1in,
+  bottom=1in
+}
+\onehalfspacing
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+% =========================
+% Title Page
+% =========================
+\begin{titlepage}
+\centering
+{\Large A Minor Project Mid-Term Progress Report On\par}
+\vspace{0.8cm}
+{\LARGE \textbf{Automated Two-Wheeler Violation Detection and E-Challan System}\par}
+\vspace{1.2cm}
+
+{\large Submitted in Partial Fulfillment of the Requirements for the Degree of\par}
+\vspace{0.3cm}
+{\large \textbf{Bachelor of Engineering in Information Technology}\par}
+\vspace{0.2cm}
+{\large Under Pokhara University\par}
+
+\vfill
+
+{\large Submitted by:\par}
+\vspace{0.3cm}
+{\large Abishek Khadka (231303)\par}
+{\large Ishbarna Kafle (231317)\par}
+{\large Madan Belbase (231323)\par}
+
+\vspace{0.8cm}
+{\large Under the supervision of:\par}
+{\large \textbf{Er. Rishi K. Marseni}\par}
+
+\vfill
+
+\includegraphics[width=0.18\textwidth]{figures/system/college-logo.png}\par
+\vspace{0.6cm}
+
+{\large Department of Computer Engineering\par}
+{\large \textbf{NEPAL COLLEGE OF INFORMATION TECHNOLOGY}\par}
+{\large Affiliated to Pokhara University\par}
+
+\vspace{0.8cm}
+{\large Date: \textbf{05 June 2026}\par}
+\end{titlepage}
+
+% =========================
+% Front matter
+% =========================
+\pagenumbering{roman}
+
+\section*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+The urban traffic management ecosystem is increasingly challenged by rising vehicle density, limited enforcement resources, and growing road safety violations. This project proposes an automated two-wheeler rider monitoring and violation detection system that leverages real-time computer vision and deep learning to identify critical infractions, including helmet non-compliance and vehicle number plate recognition for enforcement.
+
+The proposed architecture processes live CCTV/RTSP video streams through a modular AI pipeline comprising two-wheeler detection using YOLOv8, rider/helmet compliance inference using a classification model, and automatic number plate recognition (ANPR) using OCR engines such as EasyOCR/PaddleOCR. A rule-based violation engine evaluates detected events and generates evidence (images, timestamps, and location metadata). A backend service layer (FastAPI/Node.js) and a React-based dashboard support monitoring, record management, and digital challan workflows.
+
+The solution aims to improve traffic law enforcement efficiency, reduce dependence on manual surveillance, and enhance road safety through scalable, automated, AI-driven surveillance.
+
+\vspace{0.3cm}
+\textbf{Keywords:} YOLOv8, Computer Vision, Traffic Surveillance, Helmet Violation Detection, ANPR, OCR, RTSP, Deep Learning, Smart Traffic Management.
+
+\newpage
+\tableofcontents
+
+\newpage
+\listoffigures
+
+\newpage
+\listoftables
+
+\newpage
+\pagenumbering{arabic}
+
+% =========================
+% Main content
+% =========================
+
+\section{Introduction}
+Road safety remains a major concern in modern transportation systems, with traffic violations contributing significantly to accidents, injuries, and loss of life. Among two-wheeler riders, violations such as riding without helmets, carrying more than the permitted number of passengers (triple riding), and non-compliance with traffic regulations are common challenges faced by traffic authorities. Traditional enforcement methods primarily depend on manual monitoring, which can be inefficient, labor-intensive, and difficult to scale in areas with high traffic density.
+
+The Automated Two-Wheeler Violation Detection and E-Challan System is designed to automatically identify traffic rule violations involving motorcycles and scooters. By utilizing computer vision and artificial intelligence, the system continuously analyzes video streams to detect violations, identify vehicles, and generate digital evidence for enforcement purposes. The integration of automated number plate recognition and e-challan generation enables a faster, more transparent, and more consistent enforcement process.
+
+\subsection{Problem Statement}
+Road traffic violations remain a significant challenge in urban transportation systems worldwide. Among two-wheeler riders, violations such as riding without helmets, carrying more than the permitted number of passengers (triple riding), and non-compliance with traffic regulations contribute substantially to road accidents and fatalities. Traditional traffic monitoring and enforcement methods rely heavily on manual observation by traffic personnel, making the process time-consuming, labor-intensive, and prone to human error.
+
+With the rapid increase in vehicle numbers, continuous monitoring of traffic activities has become increasingly difficult. Existing surveillance systems often record traffic footage without providing automated mechanisms for detecting violations and identifying offenders. Consequently, many violations go unnoticed, reducing the effectiveness of traffic law enforcement and compromising road safety.
+
+Therefore, there is a need for an intelligent and automated system capable of monitoring traffic in real time, detecting violations accurately, extracting vehicle information, and generating evidence for enforcement purposes.
+
+\subsection{Project Objectives}
+The primary objective of this project is to design and develop an automated two-wheeler monitoring and violation detection system using computer vision and deep learning techniques for traffic surveillance.
+
+The specific objectives are:
+\begin{itemize}
+  \item To detect motorcycles and riders from live CCTV or RTSP video streams.
+  \item To identify helmet violations among motorcycle riders.
+  \item To recognize vehicle number plates using optical character recognition (OCR).
+  \item To generate violation records with supporting evidence such as images, timestamps, and vehicle information.
+  \item To provide a real-time monitoring dashboard for viewing detected violations and system analytics.
+  \item To improve traffic law enforcement efficiency through automation and AI-based surveillance.
+\end{itemize}
+
+\subsection{Scope and Limitations}
+\textbf{Scope:} The scope of the proposed system includes development of an intelligent monitoring platform focused on two-wheeler violation detection. The system is designed to:
+\begin{itemize}
+  \item Process live video feeds from CCTV cameras or RTSP streams.
+  \item Detect motorcycles and riders using YOLOv8 object detection models.
+  \item Identify helmet compliance violations.
+  \item Extract vehicle registration numbers using OCR techniques (ANPR).
+  \item Store detected violations in a centralized database.
+  \item Generate alerts and maintain violation records through a web-based dashboard.
+\end{itemize}
+
+\textbf{Limitations:} Although the proposed system aims to provide accurate and automated traffic violation detection, several limitations exist:
+\begin{itemize}
+  \item Detection accuracy may decrease under poor lighting conditions, rain, fog, or low-quality video footage.
+  \item Occlusion caused by other vehicles, pedestrians, or traffic congestion may affect rider and helmet detection performance.
+  \item Number plate recognition accuracy may vary due to motion blur, damaged plates, unusual fonts, or unfavorable camera angles.
+  \item The system's effectiveness depends on camera placement, resolution, and field of view.
+  \item Real-time performance may require dedicated GPU hardware for high-resolution video streams.
+\end{itemize}
+
+\subsection{Significance of the Study}
+The proposed system contributes to intelligent traffic management by integrating computer vision, deep learning, and automated enforcement workflows. The expected significance includes:
+\begin{itemize}
+  \item Enhancing road safety by promoting compliance with helmet and passenger safety regulations.
+  \item Reducing dependency on manual traffic monitoring and enforcement.
+  \item Increasing the efficiency and consistency of traffic violation detection.
+  \item Providing real-time monitoring capabilities for traffic authorities.
+  \item Supporting data-driven decision-making through violation analytics and reporting.
+  \item Establishing a scalable framework that can be extended to detect additional traffic violations in future work.
+\end{itemize}
+
+\section{Literature Review}
+Automated traffic monitoring systems have gained significant attention for detecting violations such as helmetless riding, triple riding, mobile phone usage while driving, and vehicle identification through automatic number plate recognition (ANPR). Deep learning-based object detection models, particularly the YOLO family, are widely adopted due to high accuracy and real-time inference capability.
+
+Existing studies often implement two-stage pipelines: first detecting vehicles/riders and then classifying helmet usage, while other works address rider counting for triple riding and specialized detectors for mobile phone usage. ANPR pipelines typically combine object detection for plate localization with OCR models for character extraction. However, integrated systems that combine multi-violation detection, ANPR, and automated e-challan workflows are comparatively limited, motivating the development of an end-to-end approach.
+
+\section{Methodology}
+\subsection{Overview}
+The proposed system monitors traffic activities and identifies two-wheeler violations in real time using computer vision and deep learning. The pipeline processes CCTV/RTSP video streams, detects motorcycles and riders, evaluates safety compliance (helmet usage), extracts vehicle registration numbers, and generates violation records and evidence for enforcement actions.
+
+A modular design is adopted to improve scalability and maintainability. The major pipeline stages include: video acquisition, detection and tracking, violation rule evaluation, ANPR/OCR, evidence generation, and data management via backend APIs and a dashboard interface.
+
+\subsection{Software Development Life Cycle (SDLC)}
+An iterative development approach is used to support continuous improvement of both software modules and machine learning models. The SDLC phases include: requirement analysis, system design, implementation, testing/integration, and deployment/maintenance. Model performance is evaluated using validation datasets and updated through iterative retraining and parameter refinement.
+
+\subsection{System Architecture}
+The system architecture is organized around a real-time processing pipeline that ingests video streams and performs inference-based decision making. At a high level, the architecture includes: (i) video ingestion and frame extraction, (ii) object detection for motorcycle/rider localization, (iii) helmet compliance classification, (iv) number plate localization and OCR for ANPR, (v) a rule-based violation engine, and (vi) a backend with a dashboard for monitoring and enforcement workflows.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/system/system_Architecture.webp}
+\caption{System architecture showing the end-to-end pipeline from CCTV/RTSP ingestion to detection, OCR-based ANPR, evidence storage, and dashboard-based monitoring.}
+\end{figure}
+
+\subsection{System Workflow}
+The operational workflow follows a continuous loop: capture video, extract frames, detect two-wheelers and riders, evaluate helmet compliance, trigger ANPR when a violation is suspected, generate evidence, store records, and update the monitoring dashboard. To reduce processing overhead, ANPR and evidence generation are executed conditionally (i.e., primarily when a violation is detected), thereby improving throughput in real-time settings.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/system/system_workflow.png}
+\caption{System workflow illustrating the sequential decision process from detection to evidence generation and e-challan issuance.}
+\end{figure}
+
+\subsection{Use Case Diagram}
+The system interacts with multiple stakeholders. Cameras act as external input sources that provide video streams. Administrative users configure the system, manage users, and oversee operational settings. Traffic police users validate violations, verify evidence, and approve or reject e-challan issuance. The use case structure clarifies functional boundaries and the human-in-the-loop enforcement role required to minimize false positives.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/system/UseCase_E-Challan.jpg}
+\caption{Use case diagram illustrating key actors (camera, admin, traffic police) and core operations such as violation detection, verification, and e-challan issuance.}
+\end{figure}
+
+\subsection{Sequence Diagram}
+The sequence diagram models the time-ordered interactions across system components. After a violation candidate is detected, the AI engine forwards evidence and metadata to the central backend, which stores the record as pending review. The dashboard notifies traffic personnel, who validate the evidence. If approved, the challan is issued and the system updates the record status and triggers notification services.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/system/sequence_Diagram.webp}
+\caption{Sequence diagram depicting the lifecycle of a violation event from detection and record creation to human verification and final e-challan issuance.}
+\end{figure}
+
+\section{System Design}
+\subsection{Functional Requirements}
+The key functional requirements are:
+\begin{itemize}
+  \item Real-time video ingestion from CCTV/RTSP sources.
+  \item Automated detection of two-wheelers and riders, followed by helmet compliance evaluation.
+  \item Targeted ANPR/OCR triggered for suspected/confirmed violations.
+  \item Evidence generation containing images, timestamps, and camera/location metadata.
+  \item Role-based verification workflow and e-challan record generation.
+  \item Dashboard interface for monitoring, search, and analytics.
+\end{itemize}
+
+\subsection{Non-Functional Requirements}
+The key non-functional requirements are:
+\begin{itemize}
+  \item Low-latency inference suitable for near real-time monitoring.
+  \item High reliability and accuracy for enforcement-oriented decisions.
+  \item Scalability to support multiple camera streams and concurrent users.
+  \item Security and privacy for stored evidence and user access.
+  \item Maintainability through modular design and retraining capability.
+\end{itemize}
+
+\section{Mid-Term Implementation and Progress}
+\subsection{Machine Learning Models Development}
+The core machine learning modules required for mid-term functionality have been implemented as separable components for deployment and evaluation:
+\begin{enumerate}
+  \item \textbf{Vehicle Detection (YOLOv8):} A YOLOv8-based detector has been trained/configured to localize motorcycles in surveillance frames. The current inference flow includes frame sampling, preprocessing, confidence filtering, and post-processing to stabilize detections.
+  \item \textbf{Helmet Detection (Classification):} A helmet compliance classifier has been integrated to categorize rider crops as \textit{Helmet} or \textit{No Helmet}. Confidence scores are preserved to support downstream decision rules and auditability.
+  \item \textbf{Number Plate Detection and Recognition (ANPR + OCR):} A preliminary ANPR pipeline has been implemented using plate localization and OCR extraction via EasyOCR/PaddleOCR. Output normalization and confidence retention have been applied to support verification and database storage.
+\end{enumerate}
+
+\subsection{Backend and Frontend Infrastructure}
+The supporting software infrastructure has been implemented to enable enforcement workflows and system monitoring:
+\begin{enumerate}
+  \item \textbf{Role-Based Access Control (RBAC):} Role separation is defined for \textit{Admin} and \textit{Traffic Police} users to ensure controlled access to sensitive operations such as approvals and system configuration.
+  \item \textbf{E-Challan Module:} A challan generation logic layer has been implemented to create structured challan records from verified violations, including unique identifiers, violation categories, evidence references, and time/location metadata.
+  \item \textbf{Frontend Dashboard:} A React-based dashboard has been developed to visualize detected events, support evidence review, and enable administrative actions based on user role.
+\end{enumerate}
+
+\section{Preliminary Results and Discussion}
+\subsection{Preliminary Results (Machine Learning)}
+The preliminary model outputs provide evidence that the training and validation pipelines are functioning and producing interpretable diagnostics. The training summary visualizes metric trends and stabilization behavior, which informs decisions about dataset balance, augmentation, and convergence. The precision--recall curve supports threshold selection for operational deployment, particularly where false positives must be minimized while maintaining adequate recall. The confusion matrix summarizes error distribution and indicates classes or scenarios that require targeted improvement (e.g., occlusion, motion blur, small object scale).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/model_results/helmet_model_results.png}
+\caption{Training summary of the helmet compliance model, showing intermediate learning trends and metric stabilization.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/model_results/Helmet_BoxPR_curve.png}
+\caption{Precision--recall curve indicating the trade-off between precision and recall across confidence thresholds (intermediate results).}
+\end{figure}
+
+% NOTE: The user requested a slightly different filename; the actual project file is:
+% figures/model_results/normalized_confusion_vehicle_detect.png
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/model_results/normalized_confusion_vehicle_detect.png}
+\caption{Normalized confusion matrix for the vehicle detection model, highlighting class-wise error distribution (intermediate results).}
+\end{figure}
+
+\subsection{Preliminary Results (System Interface and Backend)}
+The system interface prototypes demonstrate role-specific workflows and the operational feasibility of the enforcement loop. The admin view supports user management and system governance. The vehicle registration and approval views illustrate the workflow required to validate extracted plate information and approve challans. The traffic police view prioritizes evidence-centric review and decision making. The user dashboard concept supports transparency by presenting challan history and tracking. The API documentation view (Swagger) provides a structured interface for testing endpoints and verifying backend contract consistency during integration.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/super_admin_manage_users.png}
+\caption{Admin interface for user management and role administration within the RBAC workflow.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/vehicle_reg.png}
+\caption{Vehicle registration interface for entering or confirming vehicle details required for enforcement records.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/vehicle_approval.png}
+\caption{Vehicle approval interface supporting human verification of plate data and evidence prior to challan issuance.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/traffic_view.png}
+\caption{Traffic police dashboard view for reviewing detected violations, inspecting evidence, and approving/rejecting e-challans.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/user_dashboard.png}
+\caption{General user dashboard view illustrating challan history and fine tracking for transparency and payment readiness.}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/backend_frontend_figures/swagger_api.png}
+\caption{Swagger API documentation view showing backend endpoints used for integration, testing, and contract validation.}
+\end{figure}
+
+\section{Remaining Work}
+To complete the proposed scope within the final phase, the following tasks remain:
+\begin{enumerate}
+  \item \textbf{System Integration:} Establish an end-to-end data pipeline connecting ML inference outputs (detections, classifications, OCR strings, confidence scores) with FastAPI/Node.js services and the React dashboard. This includes reliable evidence storage, database persistence, and consistent workflow state transitions (e.g., \textit{Detected} $\rightarrow$ \textit{Pending Review} $\rightarrow$ \textit{Approved/Rejected} $\rightarrow$ \textit{Challan Issued}).
+  \item \textbf{Additional Model Training and Implementation:}
+  \begin{itemize}
+    \item \textbf{Triple Riding Detection:} Implement rider association and counting per motorcycle under occlusions and varying camera angles.
+    \item \textbf{Mobile Phone Usage Detection:} Train and integrate a specialized detector/classifier to identify handheld phone usage while riding.
+  \end{itemize}
+  \item \textbf{Mobile Application Development:} Develop a mobile application to support on-the-go monitoring for authorized personnel and fine tracking for vehicle owners, using the same backend APIs with secure authentication.
+\end{enumerate}
+
+\section{Conclusion}
+This mid-term report summarizes the progress achieved toward an automated two-wheeler violation detection and e-challan system. The core machine learning modules for two-wheeler detection, helmet compliance classification, and preliminary ANPR/OCR have been implemented, alongside role-based backend services and a dashboard interface. The architectural design and workflow definitions provide a clear foundation for end-to-end integration in the final phase. Future work will focus on full system integration, expansion to additional violation categories (triple riding and mobile phone usage), and improved operational accessibility through mobile application support.
+
+\newpage
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\begin{thebibliography}{99}
+
+\bibitem{chen2024}
+Y. Chen, W. Zhou, Z. Zhou, B. Ma, C. Wang, Y. Shang, A. Guo, and T. Chu, ``An Effective Method for Detecting Violation of Helmet Rule for Motorcyclists,'' in \textit{Proc. IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)}, 2024.
+
+\bibitem{said2024}
+Y. Said, Y. Alassaf, R. Ghodhbani, Y. A. Alsariera, T. Saidani, O. B. Rhaiem, M. K. Makhdoum, and M. Hleili, ``AI-Based Helmet Violation Detection for Traffic Management System,'' \textit{Computer Modeling in Engineering \& Sciences}, vol. 141, no. 1, pp. 733--749, 2024.
+
+\bibitem{deshpande2025}
+U. U. Deshpande, S. Shanbhag, R. Patil, R. Chate, A. Araujo, and S. D. C. S. Pinto, ``Automatic Two-Wheeler Rider Identification and Triple-Riding Detection in Surveillance Systems Using Deep Learning Models,'' \textit{Discover Artificial Intelligence}, vol. 5, 2025.
+
+\bibitem{charef2025}
+A. Charef, Z. Jarir, and M. Quafafou, ``Detection of Mobile Phone Usage Among Motorcycle Riders: A Computer Vision Approach,'' \textit{Lecture Notes in Electrical Engineering}, 2025.
+
+\bibitem{du2013}
+S. Du, M. Ibrahim, M. Shehata, and W. Badawy, ``Automatic License Plate Recognition (ALPR): A State-of-the-Art Review,'' \textit{IEEE Transactions on Circuits and Systems for Video Technology}, vol. 23, no. 2, pp. 311--325, 2013.
+
+\bibitem{sharma2023}
+S. K. Sharma and A. Kumar, ``Smart Traffic Management and E-Challan System Using ANPR Technology,'' \textit{International Journal of Intelligent Transportation Systems Research}, vol. 21, no. 4, pp. 512--523, 2023.
+
+\end{thebibliography}
+
+\end{document}

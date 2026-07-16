@@ -1,0 +1,53 @@
+The project follows an incremental prototyping approach. First, a baseline detection pipeline is built to identify two-wheelers and helmet usage in images. Next, the pipeline is extended to process video frames in real time, apply tracking to maintain object identity across frames, and apply violation rules. Finally, number plate extraction and e-challan generation are integrated to produce an end-to-end workflow.
+
+The overall workflow is summarized as follows:
+\begin{enumerate}[leftmargin=*]
+  \item Capture video stream (recorded file or live feed) and extract frames.
+  \item Run YOLOv8-based detection to identify relevant objects (two-wheeler, person, helmet, number plate region if modeled).
+  \item Associate detections across frames using a tracking method (e.g., IOU-based tracking or a tracker such as SORT/DeepSORT).
+  \item Determine violations using rule-based logic (e.g., rider detected without helmet for a stable sequence of frames).
+  \item Crop the number plate region and apply OCR to extract text.
+  \item Generate e-challan output with plate number, violation type, timestamp, and evidence images.
+\end{enumerate}
+
+\subsection{Software Development Lifecycle}
+This project follows a simplified iterative SDLC:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Requirement Analysis:} Identify target violations (helmet), input sources (video), and expected outputs (e-challan record).
+  \item \textbf{Design:} Define system modules---video ingestion, detection, tracking, violation logic, OCR, and report generation.
+  \item \textbf{Implementation:} Develop modules using Python, Ultralytics YOLOv8, and OpenCV; integrate OCR.
+  \item \textbf{Testing:} Validate on sample videos with different traffic density and lighting conditions; verify OCR outputs.
+  \item \textbf{Evaluation:} Measure detection metrics and runtime performance (FPS), and document failure cases.
+  \item \textbf{Iteration:} Tune models/thresholds, improve preprocessing, and refine rules based on observed errors.
+\end{itemize}
+
+\subsection{Technical Description}
+\textbf{Tools and Libraries:}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{YOLOv8 (Ultralytics):} Used for object detection due to its balance of speed and accuracy \cite{ultralyticsyolov8}.
+  \item \textbf{OpenCV:} Used for video capture, frame processing, drawing annotations, cropping ROIs, and saving evidence frames \cite{opencv_library}.
+  \item \textbf{OCR Engine:} Tesseract OCR (or an equivalent OCR model) is used to extract the registration number from the cropped number plate \cite{tesseract}.
+\end{itemize}
+
+\textbf{System Modules:}
+\begin{enumerate}[leftmargin=*]
+  \item \textbf{Frame Acquisition Module:} Reads frames from a video file or camera stream and applies resizing for consistent inference.
+  \item \textbf{Detection Module:} Runs YOLOv8 on each frame to detect motorcycles/riders, helmets, and optionally number plate regions \cite{redmon2016yolo,ultralyticsyolov8}.
+  \item \textbf{Tracking Module:} Maintains a track ID per vehicle/rider across consecutive frames to reduce duplicate challans.
+  \item \textbf{Violation Decision Module:} Uses spatial relationships and temporal smoothing to reduce false positives.
+  \item \textbf{OCR Module:} Applies preprocessing (grayscale, denoise, thresholding) before OCR to improve text extraction.
+  \item \textbf{E-Challan Generation Module:} Stores a structured record containing plate number, violation type, time, and evidence.
+\end{enumerate}
+
+\subsection{E-Challan Generation}
+When the system confirms a violation for a tracked two-wheeler, it generates an e-challan entry. Each challan record is designed to include:
+\begin{itemize}[leftmargin=*]
+  \item unique challan ID (auto-generated),
+  \item date and time (timestamp from the video frame),
+  \item detected violation type (e.g., helmet not detected),
+  \item extracted vehicle number plate text,
+  \item evidence image(s): original frame and/or cropped regions (rider/helmet/plate),
+  \item confidence scores (detection confidence and OCR confidence when available).
+\end{itemize}
+
+For the prototype, challans are stored in a local structured format (CSV/JSON) along with a folder of evidence images. The e-challan output format is kept simple to allow future integration with a web dashboard or database.

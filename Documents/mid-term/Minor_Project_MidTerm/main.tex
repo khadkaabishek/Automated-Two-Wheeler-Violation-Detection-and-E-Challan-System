@@ -1,0 +1,205 @@
+\documentclass[a4paper,12pt]{article} 
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{tabularx}
+\usepackage{lipsum}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{pgfgantt}
+\usepackage{enumitem}
+\usepackage{indentfirst}
+\linespread{1.5}
+\usepackage{geometry}
+\usepackage{float} 
+\usepackage{times}
+\geometry{left= 1.5 in,
+            right= 1 in,
+            top= 1 in,
+            bottom= 1 in}
+\usepackage{amsmath}
+\usepackage{anyfontsize}
+\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\usepackage[
+    backend=biber,
+    style=ieee,
+    sorting=none
+]{biblatex}
+
+\addbibresource{bibliography.bib}
+\pagenumbering{gobble} 
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+	
+	\large %14pt
+	A Minor Project Mid-term Report on
+	
+	\huge %24pt
+	\textbf{Automated Two-Wheeler Violation Detection and E-Challan System using YoloV8 with OpenCV}
+
+	\vfill
+	
+	\large %14pt
+	Submitted in Partial Fulfillment of the \\ 
+	Requirements for the Degree of \\ 
+	\textbf {Bachelor of Engineering in Computer Engineering} \\
+	under Pokhara University
+	
+	\vfill
+	
+	Submitted by: \\ 
+        \textbf {Abishek Khadka, 231303} \\
+        \textbf {Ishbarna Kafle, 231317} \\
+	\textbf {Madan Belbase, 231323} \\
+
+	\vfill
+	
+        Under the supervision of: \\
+	\textbf{Er. Rishi K. Marseni}
+	
+	\vfill
+	    \vspace{12mm}
+        
+	Date: \\
+	\textbf {24 January 2026}
+	
+	\vfill
+	
+	\end{center}
+	
+	\begin{wrapfigure}{L}{0.2\textwidth}
+	\centering
+	\includegraphics[width=0.2\textwidth]{figures/system/college-logo.png}
+	\end{wrapfigure}
+	
+	\fontfamily{phv}\selectfont
+	
+	\textbf {Department of Computer Engineering}  
+	
+	% \Large %17pt
+        \LARGE %21pt
+	\textbf {NEPAL COLLEGE OF} 
+	
+	\LARGE %21pt
+	\textbf {\underline {INFORMATION TECHNOLOGY} }
+	
+	\small %11 pt
+	Balkumari, Lalitpur, Nepal
+	
+	
+\end{titlepage}
+
+% \newpage
+% \pagenumbering{Roman}
+% \addcontentsline{toc}{section}
+% {\numberline{}Acknowledgementt}
+% \section*{Acknowledgement}
+% %\input{chapters/acknowledgement}\\\\
+% \newpage
+% Will use this section for final
+
+\newpage
+\pagenumbering{Roman}
+\addcontentsline{toc}{section}{Abstract}
+\section*{Abstract}
+\input{chapters/abstract}
+
+\newpage
+\tableofcontents
+
+\newpage
+\listoffigures
+
+\newpage
+\listoftables
+
+\newpage
+\pagenumbering{arabic}
+
+\section{Introduction}
+\input{chapters/introduction}
+
+\subsection{Problem Statement}
+\input{chapters/problem-statement}
+
+\newpage
+
+\subsection{Project Objectives}
+\input{chapters/project-objectives}
+
+\newpage
+
+\subsection{Significance of the study}
+\input{chapters/significance-of-study}
+
+\newpage
+
+\subsection{Scope and Limitation}
+\input{chapters/scope-and-limitations}
+\newpage
+
+\section{Literature Review}
+\input{chapters/literature-review}
+\newpage
+
+\section{Methodology}
+\input{chapters/methodology}
+\newpage
+\newpage
+
+
+\section{Deliverable/Output}
+As an outcome of this project we propose to deliver following as output on the date of completion.
+\input{chapters/deliverable}
+\newpage
+
+\section{Task Done So Far}
+\input{chapters/task-done}
+\newpage
+
+\section{Task Remaining}
+\input{chapters/task-remain}
+\newpage
+
+\section{Performance Analysis and Validation}
+\input{chapters/performance-analysis-validation}
+\newpage
+
+\section{Ethical Concerns}
+\input{chapters/ethical-concerns}
+\newpage
+
+\section{Results and Discussion}
+\input{chapters/result-and-discussion}
+\newpage
+
+\section{Project Task and Time schedule}
+\input{chapters/task-schedule}
+\newpage
+
+\section{Conclusion}
+\input{chapters/conclusion}
+\newpage
+
+\section*{References}
+\addcontentsline{toc}{section}{References}
+\raggedright
+
+\printbibliography[heading=none]
+\newpage
+\section{Abbreviations}
+
+ % %\input{chapters/abbreviation}
+\newpage
+
+\section{Appendix}
+ % %\input{chapters/appendix}
+\newpage
+
+\end{document}
