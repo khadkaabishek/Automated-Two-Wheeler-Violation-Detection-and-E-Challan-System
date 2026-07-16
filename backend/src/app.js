@@ -1,0 +1,71 @@
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import morgan from 'morgan';
+import compression from 'compression';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import swaggerUi from 'swagger-ui-express';
+
+import { env } from './config/env.js';
+import logger from './config/logger.js';
+import swaggerSpec from './config/swagger.js';
+import apiRoutes from './routes/index.js';
+import { globalLimiter } from './middlewares/rateLimiter.js';
+import { errorConverter, errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const app = express();
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: env.cors.origin,
+    credentials: true,
+  })
+);
+app.use(compression());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+const morganFormat = env.isDevelopment ? 'dev' : 'combined';
+app.use(
+  morgan(morganFormat, {
+    stream: { write: (message) => logger.http(message.trim()) },radhika
+    
+  })
+);
+
+app.use(`/api/${env.apiVersion}`, globalLimiter);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
+
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: `${env.appName} API is running`,
+    data: {
+      version: env.apiVersion,
+      docs: '/api-docs',
+    },
+    errors: null,
+  });
+});
+
+// ---- API routes ----
+app.use(`/api/${env.apiVersion}`, apiRoutes);
+
+// ---- 404 + error handling (must be last) ----
+app.use(notFoundHandler);
+app.use(errorConverter);
+app.use(errorHandler);
+
+export default app;
