@@ -1,0 +1,87 @@
+
+\label{ch:results-discussion}
+
+This chapter summarizes the progress achieved up to the mid-term defense. Since the system is under active development, the results reported here are preliminary and are intended to validate feasibility, guide further model tuning, and identify risks before final deployment.
+
+\section{Implementation Status (Mid-Term)}
+\label{sec:impl-status}
+
+At the time of mid-term review, the project has been implemented as a modular pipeline with clearly separated components:
+\begin{itemize}
+    \item Video ingestion and frame extraction from recorded CCTV samples (with RTSP support planned for final integration).
+    \item Object detection for motorcycle and rider localization using YOLOv8.
+    \item Helmet compliance detection based on cropped rider/head regions.
+    \item Rider counting logic for triple-riding violation detection.
+    \item Number plate detection and OCR integration in a prototype stage.
+    \item A preliminary backend API and database schema design for storing violations and evidence.
+\end{itemize}
+
+\section{Dataset Preparation Summary}
+\label{sec:dataset-summary}
+
+Public datasets listed in Chapter~3 were inspected and standardized into a YOLO-compatible directory structure. During preprocessing, corrupted images were removed, class labels were normalized across sources, and image resolutions were unified to match the selected training configuration. The dataset split followed the planned ratios (training/validation/testing), and augmentation strategies (flip, brightness/contrast, and small rotations) were applied during training to improve generalization.
+
+\section{Preliminary Model Training Results}
+\label{sec:prelim-training}
+
+\subsection{Motorcycle and Rider Detection}
+A YOLOv8 detector was trained/fine-tuned to identify motorcycles and rider/person instances from traffic scenes. Early experiments indicate stable detections in daylight and moderate traffic density. Failure cases are mostly associated with heavy occlusion, distant riders, and low-resolution frames.
+
+\subsection{Helmet Compliance Detection}
+Helmet detection was evaluated on cropped rider regions. The model produces reliable predictions when the rider's head region is clearly visible. False negatives were observed in cases of motion blur and when helmets are partially occluded by the rider posture or camera angle.
+
+\subsection{Triple-Riding Detection}
+Triple riding is currently determined by associating detected rider instances with a detected motorcycle and counting riders per vehicle. Preliminary tests show that rider counting is sensitive to:
+\begin{itemize}
+    \item missed rider detections under occlusion,
+    \item double-counting in crowded backgrounds,
+    \item perspective changes when motorcycles move across the field of view.
+\end{itemize}
+In the final phase, a tracking module (e.g., ByteTrack/DeepSORT) will be integrated to stabilize counts across consecutive frames and reduce duplicate violation triggers.
+
+\section{Prototype ANPR and OCR Observations}
+\label{sec:anpr-ocr}
+
+A two-step approach is being followed: (i) number plate localization using an object detector and (ii) character extraction using OCR (EasyOCR/PaddleOCR). In preliminary experiments, plate text extraction works best when the plate occupies a sufficient number of pixels and is near-frontal. OCR confidence drops significantly due to motion blur, glare, and non-standard fonts.
+
+\section{System-Level Output (Evidence Generation)}
+\label{sec:evidence}
+
+For each detected violation event, the prototype pipeline produces:
+\begin{itemize}
+    \item a cropped evidence image showing the motorcycle/rider,
+    \item metadata (timestamp and camera identifier),
+    \item the predicted violation type (no-helmet and/or triple riding),
+    \item a provisional number plate string (when OCR succeeds).
+\end{itemize}
+The mid-term objective has been to confirm that these artifacts can be generated automatically and stored for subsequent review in the dashboard.
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Feasibility and Key Findings}
+The preliminary results support the feasibility of real-time two-wheeler violation detection using a YOLOv8-based pipeline. In controlled samples, the detector provides consistent localization of motorcycles and riders, enabling downstream rule checks for helmet compliance and rider count.
+
+\subsection{Primary Challenges}
+The most important challenges identified during mid-term development are:
+\begin{itemize}
+    \item \textbf{Occlusion and crowding:} overlapping objects reduce detection and counting reliability.
+    \item \textbf{Low-quality footage:} blur and compression artifacts degrade helmet and OCR performance.
+    \item \textbf{Camera geometry:} distant viewpoints reduce the effective resolution of head and plate regions.
+    \item \textbf{Duplicate events:} without tracking, the same motorcycle may be flagged repeatedly across frames.
+\end{itemize}
+
+\subsection{Planned Improvements for Final Defense}
+To address the above limitations, the next development phase will focus on:
+\begin{itemize}
+    \item integrating multi-object tracking to create stable vehicle identities across frames,
+    \item improving helmet detection robustness with additional training samples and augmentation,
+    \item strengthening ANPR by tuning plate detection and applying OCR post-processing (regex-based cleaning and confidence thresholds),
+    \item implementing event de-duplication and temporal rules (violation confirmed only after consistent detection across $N$ consecutive frames),
+    \item completing backend integration (FastAPI endpoints, database persistence, and dashboard views).
+\end{itemize}
+
+\section{Summary}
+\label{sec:results-summary}
+
+At mid-term, the core detection pipeline has been prototyped and validated on sample traffic footage. The results highlight that accurate detection is achievable under favorable conditions, while robustness under occlusion and low-quality video remains the key area for improvement. The next phase will prioritize tracking, ANPR reliability, and end-to-end integration to support automated evidence logging and e-challan generation.
