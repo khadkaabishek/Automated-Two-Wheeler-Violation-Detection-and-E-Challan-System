@@ -48,7 +48,7 @@ Built around the actual subject matter — a traffic citation — rather than a 
    <!-- pwd -->
    - Password: `SuperAdmin@123` 
 
-   <!-- Change this password before using this anywhere but your own machine. -->
+   <!-- Change this password before using this anywhere but your own machine   . -->
 
 ## What's wired up
 
