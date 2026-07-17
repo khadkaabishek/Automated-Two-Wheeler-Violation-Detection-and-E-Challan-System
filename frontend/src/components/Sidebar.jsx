@@ -10,6 +10,7 @@ const NAV = [
     section: 'Operations',
     items: [
       { to: '/challans', label: 'Challans', icon: '▤', permission: 'challan:read' },
+      { to: '/disputes', label: 'Disputes', icon: '⚖', permission: 'challan:update' },
       { to: '/payments', label: 'Payments', icon: '¤', permission: 'payment:read' },
       { to: '/reports', label: 'Reports', icon: '⬇', permission: 'report:read' },
     ],

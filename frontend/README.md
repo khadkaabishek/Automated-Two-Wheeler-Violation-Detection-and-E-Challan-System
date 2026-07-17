@@ -43,12 +43,10 @@ Built around the actual subject matter — a traffic citation — rather than a 
 
 5. **Log in**
    Use the Super Admin account created by the backend's seed script:
-   <!-- id -->
    - Email: `superadmin@echallan.gov.np`
-   <!-- pwd -->
-   - Password: `SuperAdmin@123` 
+   - Password: `SuperAdmin@123`
 
-   <!-- Change this password before using this anywhere but your own machine   . -->
+   Change this password before using this anywhere but your own machine.
 
 ## What's wired up
 

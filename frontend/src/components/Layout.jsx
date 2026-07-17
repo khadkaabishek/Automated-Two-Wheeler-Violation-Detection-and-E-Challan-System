@@ -16,6 +16,7 @@ const TITLES = {
   '/my-profile': 'My Owner Profile',
   '/officer-application': 'Apply to Serve',
   '/officer-applications': 'Officer Applications',
+  '/disputes': 'Citation Disputes',
 };
 
 function resolveTitle(pathname) {
