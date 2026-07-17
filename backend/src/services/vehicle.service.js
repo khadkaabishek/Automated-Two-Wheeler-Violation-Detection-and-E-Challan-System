@@ -47,6 +47,8 @@ export const createVehicle = async (payload, actor, req) => {
   const vehicle = await vehicleRepository.create({
     ...payload,
     ownerId,
+    // Self-registered vehicles always start pending admin approval, regardless
+    // of what a client sends; staff-created vehicles use their own status or default ACTIVE.
     status: isSelfService ? 'PENDING_APPROVAL' : payload.status || 'ACTIVE',
   });
 
@@ -76,6 +78,7 @@ export const listVehicles = async (query, actor) => {
   if (query.vehicleType) where.vehicleType = query.vehicleType;
 
   if (actor?.roleName === ROLES.VEHICLE_OWNER) {
+    // Hard-scope to their own vehicles regardless of any ownerId a client might send.
     const ownProfile = await vehicleOwnerRepository.findByUserId(actor.id);
     if (!ownProfile) return { vehicles: [], meta: buildPaginationMeta(0, page, limit) };
     where.ownerId = ownProfile.id;

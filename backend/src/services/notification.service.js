@@ -6,6 +6,7 @@ import {
   sendChallanApprovedEmail,
   sendPaymentApprovedEmail,
   sendPaymentRejectedEmail,
+  sendDisputeResolvedEmail,
 } from './email.service.js';
 
 /**
@@ -85,5 +86,16 @@ export const notifyPaymentRejected = (payment, challan, reason) =>
       challanNumber: challan.challanNumber,
       amount: payment.amount,
       reason,
+    });
+  });
+
+export const notifyDisputeResolved = (dispute, challan, decision, resolutionNote) =>
+  safeSend('dispute-resolved', async () => {
+    const email = await resolveOwnerEmail(challan.vehicle.ownerId);
+    if (!email) return;
+    await sendDisputeResolvedEmail(email, {
+      challanNumber: challan.challanNumber,
+      decision,
+      resolutionNote,
     });
   });
