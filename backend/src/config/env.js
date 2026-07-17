@@ -6,7 +6,7 @@ const required = ['DATABASE_URL', 'JWT_ACCESS_SECRET', 'JWT_REFRESH_SECRET'];
 
 for (const key of required) {
   if (!process.env[key]) {
-
+    // eslint-disable-next-line no-console
     console.error(`FATAL ERROR: Missing required environment variable ${key}`);
     process.exit(1);
   }

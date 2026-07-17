@@ -18,6 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
+// ---- Security & core middleware ----
 app.use(helmet());
 app.use(
   cors({
@@ -29,25 +30,28 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ---- Logging ----
 const morganFormat = env.isDevelopment ? 'dev' : 'combined';
 app.use(
   morgan(morganFormat, {
-    stream: { write: (message) => logger.http(message.trim()) },radhika
-    
+    stream: { write: (message) => logger.http(message.trim()) },
   })
 );
 
+// ---- Rate limiting (global) ----
 app.use(`/api/${env.apiVersion}`, globalLimiter);
 
+// ---- Static file serving for uploads ----
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// ---- API Documentation ----
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
 
-
+// ---- Root ----
 app.get('/', (req, res) => {
   res.status(200).json({
     success: true,

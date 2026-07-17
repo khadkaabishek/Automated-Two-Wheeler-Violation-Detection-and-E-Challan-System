@@ -112,4 +112,16 @@ export const sendPaymentRejectedEmail = async (to, { challanNumber, amount, reas
   });
 };
 
+export const sendDisputeResolvedEmail = async (to, { challanNumber, decision, resolutionNote }) => {
+  const upheld = decision === 'UPHELD';
+  return sendEmail({
+    to,
+    subject: `Dispute ${upheld ? 'upheld' : 'dismissed'} - ${challanNumber}`,
+    html: upheld
+      ? `<p>Your dispute for citation <strong>${challanNumber}</strong> was upheld — the citation has been voided.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`
+      : `<p>Your dispute for citation <strong>${challanNumber}</strong> was reviewed and dismissed — the citation stands.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`,
+    text: `Dispute for citation ${challanNumber} was ${upheld ? 'upheld — citation voided' : 'dismissed — citation stands'}. Reviewer note: ${resolutionNote || 'None provided'}.`,
+  });
+};
+
 export default sendEmail;

@@ -12,6 +12,7 @@ import reportRoutes from './report.routes.js';
 import auditLogRoutes from './auditLog.routes.js';
 import aiDetectionRoutes from './aiDetection.routes.js';
 import officerApplicationRoutes from './officerApplication.routes.js';
+import challanDisputeRoutes from './challanDispute.routes.js';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use('/reports', reportRoutes);
 router.use('/audit-logs', auditLogRoutes);
 router.use('/ai-detection', aiDetectionRoutes);
 router.use('/officer-applications', officerApplicationRoutes);
+router.use('/disputes', challanDisputeRoutes);
 
 router.get('/health', (req, res) => {
   res.status(200).json({
