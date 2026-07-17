@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { challanApi } from '../api/challans';
 import { violationApi } from '../api/violations';
+import { disputeApi } from '../api/disputes';
 import { toISODateTime } from '../utils/date';
 import Modal from '../components/Modal';
 import Field from '../components/Field';
@@ -28,13 +29,17 @@ const EMPTY_FORM = {
 
 export default function Challans() {
   const toast = useToast();
-  const { hasPermission } = useAuth();
+  const { hasPermission, hasRole } = useAuth();
   const [challans, setChallans] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
+
+  const [disputeOpen, setDisputeOpen] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [disputeSaving, setDisputeSaving] = useState(false);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [violationOptions, setViolationOptions] = useState([]);
@@ -123,6 +128,8 @@ export default function Challans() {
     setDetailLoading(true);
     setEvidenceImages([]);
     setEvidenceVideos([]);
+    setDisputeOpen(false);
+    setDisputeReason('');
     try {
       const res = await challanApi.get(id);
       setDetail(res);
@@ -155,6 +162,21 @@ export default function Challans() {
     }
   };
 
+  const submitDispute = async (e) => {
+    e.preventDefault();
+    setDisputeSaving(true);
+    try {
+      await disputeApi.create({ challanId: detailId, reason: disputeReason });
+      toast.success('Dispute submitted — a reviewer will respond soon');
+      setDisputeOpen(false);
+      setDisputeReason('');
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setDisputeSaving(false);
+    }
+  };
+
   const uploadEvidence = async () => {
     if (evidenceImages.length === 0 && evidenceVideos.length === 0) {
       return toast.error('Choose at least one file');
@@ -181,7 +203,7 @@ export default function Challans() {
           <div className="page-sub">Citations issued, their status, and the enforcement trail</div>
         </div>
         {hasPermission('challan:create') && (
-          <button className="btn btn-primary" onClick={openCreate}>
+          <button className="btn btn-warn" onClick={openCreate}>
             + Issue challan
           </button>
         )}
@@ -338,7 +360,7 @@ export default function Challans() {
               <button type="button" className="btn btn-ghost" onClick={() => setCreateOpen(false)}>
                 Cancel
               </button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>
+              <button type="submit" className="btn btn-warn" disabled={saving}>
                 {saving ? <span className="spinner" /> : 'Issue challan'}
               </button>
             </div>
@@ -375,8 +397,40 @@ export default function Challans() {
                       Close
                     </button>
                   )}
+                  {hasRole('User') && ['PENDING', 'APPROVED'].includes(detail.status) && (
+                    <button className="btn btn-warn btn-sm" onClick={() => setDisputeOpen(true)}>
+                      Dispute — I didn&apos;t do this
+                    </button>
+                  )}
                 </div>
               </TicketCard>
+
+              {disputeOpen && (
+                <div className="card" style={{ marginTop: 16, borderColor: 'var(--civic-red-dim)' }}>
+                  <div className="card__title" style={{ fontSize: 13, color: 'var(--civic-red)', marginBottom: 10 }}>
+                    Dispute this citation
+                  </div>
+                  <form onSubmit={submitDispute}>
+                    <Field label="Why do you believe this citation is incorrect?">
+                      <textarea
+                        className="textarea"
+                        required
+                        value={disputeReason}
+                        onChange={(e) => setDisputeReason(e.target.value)}
+                        placeholder="Explain what happened — a traffic officer or admin will review this"
+                      />
+                    </Field>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDisputeOpen(false)}>
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-warn btn-sm" disabled={disputeSaving}>
+                        {disputeSaving ? <span className="spinner" /> : 'Submit dispute'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
 
               {detail.evidences?.length > 0 && (
                 <div style={{ marginTop: 16 }}>

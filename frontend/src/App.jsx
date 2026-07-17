@@ -19,6 +19,7 @@ import AuditLogs from './pages/AuditLogs';
 import MyProfile from './pages/MyProfile';
 import OfficerApply from './pages/OfficerApply';
 import OfficerApplications from './pages/OfficerApplications';
+import Disputes from './pages/Disputes';
 
 export default function App() {
   return (
@@ -49,6 +50,7 @@ export default function App() {
               <Route path="my-profile" element={<MyProfile />} />
               <Route path="officer-application" element={<OfficerApply />} />
               <Route path="officer-applications" element={<OfficerApplications />} />
+              <Route path="disputes" element={<Disputes />} />
             </Route>
           </Routes>
         </BrowserRouter>

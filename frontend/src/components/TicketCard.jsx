@@ -1,4 +1,5 @@
 import StatusBadge from './StatusBadge';
+import { IconWarning } from './icons';
 
 const STAMP_COLOR = {
   PENDING: 'var(--signal-amber)',
@@ -49,10 +50,13 @@ export default function TicketCard({ challan, children }) {
           <div className="ticket__value">{challan.address || '—'}</div>
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <div className="ticket__label">Violations</div>
+          <div className="ticket__label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <IconWarning size={13} color="var(--civic-red)" />
+            Violations
+          </div>
           <div className="ticket__violations">
             {(challan.challanViolations || []).map((cv) => (
-              <span key={cv.id} className="chip">
+              <span key={cv.id} className="chip chip--violation">
                 {cv.violation?.name} · Rs {Number(cv.fineAmount).toLocaleString()}
               </span>
             ))}
