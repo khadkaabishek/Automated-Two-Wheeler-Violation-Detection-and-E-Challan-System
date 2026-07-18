@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/abishekkhadka/Desktop/Bachelor-s-Note/6th Sem/Automated-Two-Wheeler-Violation-Detection-and-E-Challan-System/backend/src/logs/.f1cfce29599bf681176c2981ca90e01fed4dfa2a-audit.json",
+    "files": [
+        {
+            "date": 1784297933351,
+            "name": "/Users/abishekkhadka/Desktop/Bachelor-s-Note/6th Sem/Automated-Two-Wheeler-Violation-Detection-and-E-Challan-System/backend/src/logs/combined-2026-07-17.log",
+            "hash": "5994e3fa486edcc56ddf8f825547e986386dac61af57a3c4a100d94b55c20811"
+        },
+        {
+            "date": 1784340662574,
+            "name": "/Users/abishekkhadka/Desktop/Bachelor-s-Note/6th Sem/Automated-Two-Wheeler-Violation-Detection-and-E-Challan-System/backend/src/logs/combined-2026-07-18.log",
+            "hash": "5e8e036145518d0500afadc0a0d5a4e1ab315b78a69b312d53ece978ec93da28"
+        }
+    ],
+    "hashType": "sha256"
+}
