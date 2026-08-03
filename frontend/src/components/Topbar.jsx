@@ -36,7 +36,7 @@ export default function Topbar({ title }) {
         <button type="submit" className="btn btn-primary btn-sm">Search</button>
       </form>
       <div className="topbar__user" style={{ position: 'relative' }}>
-        <span className="topbar__role">{user?.role?.name}</span>
+        <span className="badge bg-info-subtle text-info border border-info-subtle me-2">{user?.role?.name || 'Officer'}</span>
         <button
           className="btn btn-ghost btn-sm"
           onClick={() => setOpen((o) => !o)}
