@@ -5,6 +5,8 @@ import TrafficDashboard from './dashboards/TrafficDashboard';
 import OwnerDashboard from './dashboards/OwnerDashboard';
 
 export default function Dashboard() {
+  const [stats, setStats] = useState({ totalChallans: 1240, pendingFines: 45000, resolvedToday: 18 });
+  const [loadingStats, setLoadingStats] = useState(false);
   const { hasRole } = useAuth();
 
   if (hasRole('Super Admin')) return <SuperAdminDashboard />;
