@@ -6,6 +6,15 @@ export default function Topbar({ title }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [searchPlate, setSearchPlate] = useState('');
+
+  const handleQuickPlateSearch = (e) => {
+    e.preventDefault();
+    if (searchPlate.trim()) {
+      navigate(`/vehicles?search=${encodeURIComponent(searchPlate.trim())}`);
+      setSearchPlate('');
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
