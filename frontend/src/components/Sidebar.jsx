@@ -43,7 +43,7 @@ const NAV = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ pendingCount = 0 }) {
   const { hasPermission, hasRole } = useAuth();
 
   return (
