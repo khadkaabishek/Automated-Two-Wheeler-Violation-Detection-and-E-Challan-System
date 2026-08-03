@@ -24,6 +24,17 @@ export default function Topbar({ title }) {
   return (
     <header className="topbar">
       <div className="topbar__crumb">{title}</div>
+      <form onSubmit={handleQuickPlateSearch} style={{ margin: '0 16px', display: 'flex', gap: 6 }}>
+        <input
+          type="text"
+          className="form-control form-control-sm"
+          placeholder="Search Vehicle Plate (e.g. BA 2 PA 1234)..."
+          value={searchPlate}
+          onChange={(e) => setSearchPlate(e.target.value)}
+          style={{ width: 260 }}
+        />
+        <button type="submit" className="btn btn-primary btn-sm">Search</button>
+      </form>
       <div className="topbar__user" style={{ position: 'relative' }}>
         <span className="topbar__role">{user?.role?.name}</span>
         <button
