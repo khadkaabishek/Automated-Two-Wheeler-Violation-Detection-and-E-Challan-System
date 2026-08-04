@@ -12,6 +12,18 @@ export default function Dashboard() {
   if (hasRole('Super Admin')) return <SuperAdminDashboard />;
   if (hasRole('Traffic Police')) return <TrafficDashboard />;
   if (hasRole('User')) return <OwnerDashboard />;
+
+  const refreshDashboardStats = async () => {
+    setLoadingStats(true);
+    try {
+      const res = await api.get('/reports/summary');
+      if (res.data) setStats(res.data);
+    } catch (err) {
+      console.error('Failed to fetch dashboard summary stats:', err);
+    } finally {
+      setLoadingStats(false);
+    }
+  };
   // Fallback for any future/misconfigured role with no matching dashboard.
   return <Navigate to="/reports" replace />;
 }
