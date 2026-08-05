@@ -13,6 +13,28 @@ import { useAuth } from '../context/AuthContext';
 const METHODS = ['CASH', 'BANK_TRANSFER', 'ESEWA', 'KHALTI', 'STRIPE'];
 
 export default function Payments() {
+  const [selectedChallan, setSelectedChallan] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+  const handleInitiateEsewaPayment = async (challanId, amount) => {
+    setIsProcessingPayment(true);
+    try {
+      const payload = {
+        amount,
+        failureUrl: `${window.location.origin}/payments?status=failed`,
+        successUrl: `${window.location.origin}/payments?status=success`,
+        challanId,
+      };
+      const res = await api.post('/payments/esewa/initiate', payload);
+      if (res.data?.paymentUrl) {
+        window.location.href = res.data.paymentUrl;
+      }
+    } catch (err) {
+      toast.error('Failed to initiate eSewa payment gateway');
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
   const toast = useToast();
   const { hasPermission } = useAuth();
   const canReview = hasPermission('payment:update');
@@ -65,7 +87,8 @@ export default function Payments() {
         setChallanResults([]);
       }
     }, 300);
-    return () => clearTimeout(handle);
+    const [paymentGateway, setPaymentGateway] = useState('eSewa');
+  return () => clearTimeout(handle);
   }, [challanQuery]);
 
   const openCreate = () => {
