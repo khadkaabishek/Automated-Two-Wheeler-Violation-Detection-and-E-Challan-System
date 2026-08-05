@@ -11,6 +11,10 @@ import { useAuth } from '../context/AuthContext';
 const EMPTY_FORM = { name: '', description: '', fineAmount: '', isActive: true };
 
 export default function Violations() {
+  const [violationCategory, setViolationCategory] = useState('ALL');
+  const [minFineAmount, setMinFineAmount] = useState(0);
+
+  const violationTypes = ['NO_HELMET', 'TRIPLE_RIDING', 'OVER_SPEEDING', 'NO_LICENSE'];
   const toast = useToast();
   const { hasPermission } = useAuth();
   const [items, setItems] = useState([]);
