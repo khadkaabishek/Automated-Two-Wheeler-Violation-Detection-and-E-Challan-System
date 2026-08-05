@@ -34,6 +34,12 @@ const EMPTY_FORM = {
 };
 
 export default function Challans() {
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState('ALL');
+  const [totalFineSum, setTotalFineSum] = useState(0);
+
+  const calculateTotalFines = (items) => {
+    return items.reduce((acc, curr) => acc + Number(curr.amount || curr.fineAmount || 0), 0);
+  };
   const toast = useToast();
   const location = useLocation();
   const navigate = useNavigate();
