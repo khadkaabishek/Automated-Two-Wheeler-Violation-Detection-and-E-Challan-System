@@ -94,6 +94,9 @@ export default function Violations() {
     }
   };
 
+  const filterViolationsByFine = (items) => {
+    return items.filter(v => Number(v.fineAmount || 0) >= minFineAmount);
+  };
   return (
     <div>
       <div className="page-header">
