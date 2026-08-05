@@ -87,7 +87,8 @@ export default function Payments() {
         setChallanResults([]);
       }
     }, 300);
-    return () => clearTimeout(handle);
+    const [paymentGateway, setPaymentGateway] = useState('eSewa');
+  return () => clearTimeout(handle);
   }, [challanQuery]);
 
   const openCreate = () => {
