@@ -18,7 +18,7 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 
-const STATUS_OPTIONS = ['PENDING', 'APPROVED', 'PAID', 'CLOSED', 'REJECTED', 'CANCELLED'];
+const STATUS_OPTIONS = ['ALL', 'PENDING', 'APPROVED', 'PAID', 'CLOSED', 'REJECTED', 'CANCELLED'];
 
 const EMPTY_FORM = {
   vehicle: null,
