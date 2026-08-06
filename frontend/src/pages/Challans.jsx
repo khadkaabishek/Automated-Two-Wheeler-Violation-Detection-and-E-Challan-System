@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { challanApi } from '../api/challans';
 import { violationApi } from '../api/violations';
 import { disputeApi } from '../api/disputes';
+import { aiDetectionApi } from '../api/aiDetection';
 import { toISODateTime } from '../utils/date';
 import Modal from '../components/Modal';
 import Field from '../components/Field';
@@ -13,6 +15,7 @@ import TicketCard from '../components/TicketCard';
 import VehiclePicker from '../components/VehiclePicker';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 
 const STATUS_OPTIONS = ['PENDING', 'APPROVED', 'PAID', 'CLOSED', 'REJECTED', 'CANCELLED'];
 
@@ -25,11 +28,14 @@ const EMPTY_FORM = {
   gpsLongitude: '',
   incidentDate: '',
   incidentTime: '',
+  aiDetectionId: null,
+  aiSnapshotUrl: null,
 };
 
 export default function Challans() {
   const toast = useToast();
   const { hasPermission, hasRole } = useAuth();
+  const location = useLocation();
   const [challans, setChallans] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -76,16 +82,50 @@ export default function Challans() {
     load();
   }, [load]);
 
-  const openCreate = async () => {
+  const openCreate = async (prefillData = null) => {
     setForm(EMPTY_FORM);
     setCreateOpen(true);
     try {
       const res = await violationApi.list({ isActive: 'true', limit: 100 });
       setViolationOptions(res.violations);
+      
+      if (prefillData) {
+        // We have prefill data from AI Detection
+        // 1. Try to find the vehicle
+        try {
+          const vRes = await api.get('/vehicles', { search: prefillData.aiPlateNumber });
+          if (vRes.vehicles?.length > 0) {
+            setForm(f => ({ ...f, vehicle: vRes.vehicles[0] }));
+          }
+        } catch (e) {
+           // Ignore
+        }
+        
+        // 2. Map violation names to IDs
+        const matchedViolationIds = res.violations
+          .filter(v => prefillData.aiViolations.includes(v.name))
+          .map(v => v.id);
+          
+        setForm(f => ({
+          ...f,
+          violationIds: matchedViolationIds,
+          description: `Automated AI Detection - OCR Plate: ${prefillData.aiPlateNumber}`,
+          aiDetectionId: prefillData.aiDetectionId,
+          aiSnapshotUrl: prefillData.aiSnapshotUrl,
+        }));
+      }
     } catch {
       /* non-fatal */
     }
   };
+
+  useEffect(() => {
+    if (location.state?.autoOpenCreate) {
+      openCreate(location.state);
+      // Clear state so it doesn't reopen on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const toggleViolation = (id) => {
     setForm((f) => ({
@@ -103,7 +143,7 @@ export default function Challans() {
 
     setSaving(true);
     try {
-      await challanApi.create({
+      const newChallan = await challanApi.create({
         vehicleId: form.vehicle.id,
         violationIds: form.violationIds,
         description: form.description || undefined,
@@ -112,7 +152,14 @@ export default function Challans() {
         gpsLongitude: form.gpsLongitude ? Number(form.gpsLongitude) : undefined,
         incidentDate: toISODateTime(form.incidentDate),
         incidentTime: form.incidentTime,
+        aiSnapshotUrl: form.aiSnapshotUrl,
       });
+      
+      // If this came from an AI detection, mark it as PROCESSED
+      if (form.aiDetectionId) {
+        await aiDetectionApi.updateDetection(form.aiDetectionId, 'PROCESSED');
+      }
+
       toast.success('Challan issued');
       setCreateOpen(false);
       load();
@@ -263,6 +310,11 @@ export default function Challans() {
                     <td className="mono">Rs {Number(c.fineAmount).toLocaleString()}</td>
                     <td>
                       <StatusBadge status={c.status} />
+                      {c.description?.includes('Automated AI Detection') && (
+                        <span className="chip" style={{ marginLeft: 8, background: 'var(--civic-gold)', color: '#000', fontSize: '0.7rem' }}>
+                          🤖 AI Draft
+                        </span>
+                      )}
                     </td>
                     <td>
                       <button className="btn btn-ghost btn-sm" onClick={() => openDetail(c.id)}>

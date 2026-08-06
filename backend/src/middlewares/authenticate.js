@@ -8,13 +8,17 @@ import prisma from '../config/database.js';
  * (with role + permissions) to req.user. Protects private routes.
  */
 export const authenticate = asyncHandler(async (req, res, next) => {
+  let token;
   const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw ApiError.unauthorized('Authentication token missing');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query && req.query.token) {
+    token = req.query.token;
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    throw ApiError.unauthorized('Authentication token missing');
+  }
 
   let decoded;
   try {
