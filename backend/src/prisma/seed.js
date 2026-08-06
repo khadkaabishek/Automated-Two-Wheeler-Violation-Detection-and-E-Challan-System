@@ -19,6 +19,7 @@ const ROLE_PERMISSION_MAP = {
     // Traffic Police reviews and approves/rejects citizen-submitted payment requests.
     PERMISSIONS.PAYMENT_READ, PERMISSIONS.PAYMENT_UPDATE,
     PERMISSIONS.DASHBOARD_READ,
+    PERMISSIONS.LIVE_MONITORING_READ, PERMISSIONS.LIVE_MONITORING_CREATE,
   ],
   [ROLES.VEHICLE_OWNER]: [
     // VEHICLE_CREATE lets them self-register a vehicle (always starts PENDING_APPROVAL;

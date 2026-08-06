@@ -145,3 +145,4 @@ runs
 backend/src/logs
 ML/Code/number_plate/evidence
 ML/Code/number_plate/plates
+backend/src/uploads
