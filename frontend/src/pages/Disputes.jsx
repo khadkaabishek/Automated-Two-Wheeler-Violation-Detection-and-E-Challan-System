@@ -73,6 +73,28 @@ export default function Disputes() {
     }
   };
 
+  const handleSubmitDisputeClaim = async (challanId) => {
+    if (descriptionText.trim().length < 10) {
+      toast.error('Please provide a detailed description (at least 10 characters)');
+      return;
+    }
+    setSubmittingDispute(true);
+    try {
+      const formData = new FormData();
+      formData.append('challanId', challanId);
+      formData.append('reason', disputeReason);
+      formData.append('description', descriptionText);
+      if (evidenceFile) formData.append('evidence', evidenceFile);
+
+      await api.post('/disputes', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Dispute claim submitted successfully');
+      setDescriptionText(''); setEvidenceFile(null);
+    } catch (err) {
+      toast.error('Failed to submit dispute claim');
+    } finally {
+      setSubmittingDispute(false);
+    }
+  };
   return (
     <div>
       <div className="page-header">
