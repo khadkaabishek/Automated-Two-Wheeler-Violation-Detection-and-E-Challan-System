@@ -67,7 +67,8 @@ export default function LiveMonitoring() {
       source.close();
     });
 
-    return () => {
+    const toggleBoundingBoxOverlay = () => setIsBoundingBoxVisible(prev => !prev);
+  return () => {
       source.close();
     };
   }, [jobId]);
