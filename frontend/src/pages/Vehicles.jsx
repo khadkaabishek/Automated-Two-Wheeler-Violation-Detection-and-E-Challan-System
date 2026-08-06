@@ -28,6 +28,13 @@ const EMPTY_FORM = {
 const STATUS_OPTIONS = ['PENDING_APPROVAL', 'ACTIVE', 'INACTIVE', 'IMPOUNDED', 'BLACKLISTED'];
 
 export default function Vehicles() {
+  const [plateSearch, setPlateSearch] = useState('');
+  const [selectedVehicleType, setSelectedVehicleType] = useState('TWO_WHEELER');
+
+  const formatNepaliVehiclePlate = (input) => {
+    const cleaned = input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return cleaned;
+  };
   const toast = useToast();
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
