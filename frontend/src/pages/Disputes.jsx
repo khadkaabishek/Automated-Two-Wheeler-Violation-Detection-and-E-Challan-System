@@ -10,6 +10,16 @@ import { IconGavel } from '../components/icons';
 import { useToast } from '../context/ToastContext';
 
 export default function Disputes() {
+  const [disputeReason, setDisputeReason] = useState('NOT_MY_VEHICLE');
+  const [descriptionText, setDescriptionText] = useState('');
+  const [evidenceFile, setEvidenceFile] = useState(null);
+  const [submittingDispute, setSubmittingDispute] = useState(false);
+
+  const handleEvidenceFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setEvidenceFile(e.target.files[0]);
+    }
+  };
   const toast = useToast();
   const [disputes, setDisputes] = useState([]);
   const [meta, setMeta] = useState(null);
