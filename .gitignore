@@ -143,3 +143,5 @@ Desktop.ini
 *.temp
 runs
 backend/src/logs
+ML/Code/number_plate/evidence
+ML/Code/number_plate/plates
