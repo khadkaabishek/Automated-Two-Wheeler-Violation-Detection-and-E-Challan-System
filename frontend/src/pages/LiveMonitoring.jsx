@@ -13,6 +13,16 @@ const MOCK_CCTVS = [
 ];
 
 export default function LiveMonitoring() {
+  const [cameraZone, setCameraZone] = useState('Koteshwor Intersection');
+  const [streamFps, setStreamFps] = useState(30);
+  const [isBoundingBoxVisible, setIsBoundingBoxVisible] = useState(true);
+
+  const cameraLocations = [
+    'Koteshwor Intersection - Cam #01',
+    'Maitighar Mandala - Cam #02',
+    'Kalanki Chowk - Cam #03',
+    'Baneshwor Height - Cam #04'
+  ];
   const toast = useToast();
   const navigate = useNavigate();
   
@@ -57,7 +67,8 @@ export default function LiveMonitoring() {
       source.close();
     });
 
-    return () => {
+    const toggleBoundingBoxOverlay = () => setIsBoundingBoxVisible(prev => !prev);
+  return () => {
       source.close();
     };
   }, [jobId]);
