@@ -21,6 +21,7 @@ import OfficerApply from './pages/OfficerApply';
 import OfficerApplications from './pages/OfficerApplications';
 import Disputes from './pages/Disputes';
 import LiveMonitoring from './pages/LiveMonitoring';
+import ModelDetections from './pages/ModelDetections';
 
 export default function App() {
   return (
@@ -53,6 +54,7 @@ export default function App() {
               <Route path="officer-application" element={<OfficerApply />} />
               <Route path="officer-applications" element={<OfficerApplications />} />
               <Route path="disputes" element={<Disputes />} />
+              <Route path="ai-detections" element={<ModelDetections />} />
             </Route>
           </Routes>
         </BrowserRouter>

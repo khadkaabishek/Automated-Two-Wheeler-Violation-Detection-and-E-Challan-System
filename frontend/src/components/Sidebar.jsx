@@ -10,6 +10,7 @@ const NAV = [
     section: 'Operations',
     items: [
       { to: '/live-monitoring', label: 'Live Monitoring', icon: '⌕', permission: 'live_monitoring:read' },
+      { to: '/ai-detections', label: 'AI Detections', icon: '🤖', permission: 'live_monitoring:read' },
       { to: '/challans', label: 'Challans', icon: '▤', permission: 'challan:read' },
       { to: '/disputes', label: 'Disputes', icon: '⚖', permission: 'challan:update' },
       { to: '/payments', label: 'Payments', icon: '¤', permission: 'payment:read' },
