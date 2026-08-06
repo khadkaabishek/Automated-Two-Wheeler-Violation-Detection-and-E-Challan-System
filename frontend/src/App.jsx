@@ -20,6 +20,7 @@ import MyProfile from './pages/MyProfile';
 import OfficerApply from './pages/OfficerApply';
 import OfficerApplications from './pages/OfficerApplications';
 import Disputes from './pages/Disputes';
+import LiveMonitoring from './pages/LiveMonitoring';
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="live-monitoring" element={<LiveMonitoring />} />
               <Route path="challans" element={<Challans />} />
               <Route path="payments" element={<Payments />} />
               <Route path="reports" element={<Reports />} />

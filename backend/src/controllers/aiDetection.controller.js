@@ -23,3 +23,23 @@ export const getStatus = asyncHandler(async (req, res) => {
     ],
   });
 });
+
+/**
+ * Handle video upload for AI processing testing
+ */
+export const uploadVideo = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return new ApiResponse(res, 400, 'No video file provided');
+  }
+
+  // In the future, here we would trigger the ML pipeline, for instance:
+  // - Send message to RabbitMQ/Redis Queue
+  // - Or call a Python microservice via HTTP
+  
+  new ApiResponse(res, 200, 'Video uploaded successfully. Queued for AI processing.', {
+    fileName: req.file.filename,
+    path: req.file.path,
+    size: req.file.size,
+    status: 'queued',
+  });
+});
