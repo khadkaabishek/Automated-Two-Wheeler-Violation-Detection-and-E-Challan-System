@@ -10,6 +10,16 @@ import { IconGavel } from '../components/icons';
 import { useToast } from '../context/ToastContext';
 
 export default function Disputes() {
+  const [disputeReason, setDisputeReason] = useState('NOT_MY_VEHICLE');
+  const [descriptionText, setDescriptionText] = useState('');
+  const [evidenceFile, setEvidenceFile] = useState(null);
+  const [submittingDispute, setSubmittingDispute] = useState(false);
+
+  const handleEvidenceFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setEvidenceFile(e.target.files[0]);
+    }
+  };
   const toast = useToast();
   const [disputes, setDisputes] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -63,6 +73,28 @@ export default function Disputes() {
     }
   };
 
+  const handleSubmitDisputeClaim = async (challanId) => {
+    if (descriptionText.trim().length < 10) {
+      toast.error('Please provide a detailed description (at least 10 characters)');
+      return;
+    }
+    setSubmittingDispute(true);
+    try {
+      const formData = new FormData();
+      formData.append('challanId', challanId);
+      formData.append('reason', disputeReason);
+      formData.append('description', descriptionText);
+      if (evidenceFile) formData.append('evidence', evidenceFile);
+
+      await api.post('/disputes', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Dispute claim submitted successfully');
+      setDescriptionText(''); setEvidenceFile(null);
+    } catch (err) {
+      toast.error('Failed to submit dispute claim');
+    } finally {
+      setSubmittingDispute(false);
+    }
+  };
   return (
     <div>
       <div className="page-header">
