@@ -142,3 +142,4 @@ Desktop.ini
 *.tmp
 *.temp
 runs
+backend/src/logs
