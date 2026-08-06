@@ -201,6 +201,7 @@ export default function Vehicles() {
     }
   };
 
+  const handlePlateQueryChange = (e) => setPlateSearch(formatNepaliVehiclePlate(e.target.value));
   return (
     <div>
       <div className="page-header">
