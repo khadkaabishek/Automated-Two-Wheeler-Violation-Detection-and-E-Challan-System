@@ -1,0 +1,476 @@
+// ==========================================================
+// E-Challan Management System - Prisma Schema
+// ==========================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================================
+// ENUMS
+// ==========================================================
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum VehicleStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  INACTIVE
+  IMPOUNDED
+  BLACKLISTED
+}
+
+enum ChallanStatus {
+  PENDING
+  APPROVED
+  PAID
+  CLOSED
+  REJECTED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum OfficerApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ChallanDisputeStatus {
+  PENDING
+  UPHELD
+  DISMISSED
+}
+
+enum FlaggedDetectionStatus {
+  PENDING_REVIEW
+  CONVERTED
+  DISMISSED
+}
+
+enum PaymentMethod {
+  CASH
+  ESEWA
+  KHALTI
+  STRIPE
+  BANK_TRANSFER
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  USER_ACTIVATED
+  USER_DEACTIVATED
+  ROLE_CREATED
+  ROLE_UPDATED
+  ROLE_DELETED
+  PERMISSION_ASSIGNED
+  VEHICLE_CREATED
+  VEHICLE_UPDATED
+  VEHICLE_DELETED
+  OWNER_CREATED
+  OWNER_UPDATED
+  OWNER_DELETED
+  VIOLATION_CREATED
+  VIOLATION_UPDATED
+  VIOLATION_DELETED
+  CHALLAN_CREATED
+  CHALLAN_UPDATED
+  CHALLAN_APPROVED
+  CHALLAN_REJECTED
+  CHALLAN_CLOSED
+  CHALLAN_PAID
+  CHALLAN_DELETED
+  PAYMENT_INITIATED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PASSWORD_CHANGED
+  PASSWORD_RESET
+  PROFILE_UPDATED
+}
+
+// ==========================================================
+// AUTH / RBAC
+// ==========================================================
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  module      String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  rolePermissions RolePermission[]
+
+  @@index([module])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String   @id @default(uuid())
+  roleId       String   @map("role_id")
+  permissionId String   @map("permission_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id                     String     @id @default(uuid())
+  fullName               String     @map("full_name")
+  email                  String     @unique
+  phone                  String?    @unique
+  password               String
+  avatar                 String?
+  roleId                 String     @map("role_id")
+  status                 UserStatus @default(ACTIVE)
+  isEmailVerified        Boolean    @default(false) @map("is_email_verified")
+  emailVerificationToken String?    @map("email_verification_token")
+  passwordResetToken     String?    @map("password_reset_token")
+  passwordResetExpires   DateTime?  @map("password_reset_expires")
+  lastLoginAt            DateTime?  @map("last_login_at")
+  createdAt              DateTime   @default(now()) @map("created_at")
+  updatedAt              DateTime   @updatedAt @map("updated_at")
+  deletedAt              DateTime?  @map("deleted_at")
+
+  role          Role           @relation(fields: [roleId], references: [id])
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]
+  vehicleOwner  VehicleOwner?
+  challansAsOfficer Challan[]  @relation("ChallanOfficer")
+  officerApplications OfficerApplication[]
+  disputesRaised      ChallanDispute[]
+  flaggedDetections   FlaggedDetection[]
+
+  @@index([roleId])
+  @@index([status])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  userAgent String?  @map("user_agent")
+  ipAddress String?  @map("ip_address")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+// ==========================================================
+// OFFICER APPLICATION (self-service request to become Traffic Police)
+// ==========================================================
+
+model OfficerApplication {
+  id              String                   @id @default(uuid())
+  applicantId     String                   @map("applicant_id")
+  message         String?
+  desiredStation  String?                  @map("desired_station")
+  status          OfficerApplicationStatus @default(PENDING)
+  reviewedBy      String?                  @map("reviewed_by")
+  reviewedAt      DateTime?                @map("reviewed_at")
+  rejectionReason String?                  @map("rejection_reason")
+  createdAt       DateTime                 @default(now()) @map("created_at")
+  updatedAt       DateTime                 @updatedAt @map("updated_at")
+
+  applicant User @relation(fields: [applicantId], references: [id])
+
+  @@index([applicantId])
+  @@index([status])
+  @@map("officer_applications")
+}
+
+// ==========================================================
+// VEHICLE OWNER / VEHICLE
+// ==========================================================
+
+model VehicleOwner {
+  id                String   @id @default(uuid())
+  userId            String?  @unique @map("user_id")
+  fullName          String   @map("full_name")
+  address           String
+  citizenshipNumber String   @unique @map("citizenship_number")
+  licenseNumber     String   @unique @map("license_number")
+  phone             String
+  email             String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  deletedAt         DateTime? @map("deleted_at")
+
+  user     User?     @relation(fields: [userId], references: [id])
+  vehicles Vehicle[]
+
+  @@index([citizenshipNumber])
+  @@index([licenseNumber])
+  @@map("vehicle_owners")
+}
+
+model Vehicle {
+  id                 String        @id @default(uuid())
+  vehicleNumber      String        @unique @map("vehicle_number")
+  vehicleType        String        @map("vehicle_type")
+  brand              String
+  model              String
+  color              String
+  registrationNumber String        @unique @map("registration_number")
+  registrationDate   DateTime      @map("registration_date")
+  insuranceExpiry    DateTime      @map("insurance_expiry")
+  bluebookNumber     String        @unique @map("bluebook_number")
+  image              String?
+  ownerId            String        @map("owner_id")
+  status             VehicleStatus @default(ACTIVE)
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+  deletedAt          DateTime?     @map("deleted_at")
+
+  owner    VehicleOwner @relation(fields: [ownerId], references: [id])
+  challans Challan[]
+
+  @@index([ownerId])
+  @@index([vehicleNumber])
+  @@index([status])
+  @@map("vehicles")
+}
+
+// ==========================================================
+// VIOLATION
+// ==========================================================
+
+model Violation {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  fineAmount  Decimal  @map("fine_amount") @db.Decimal(10, 2)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  challanViolations ChallanViolation[]
+
+  @@map("violations")
+}
+
+// ==========================================================
+// CHALLAN
+// ==========================================================
+
+model Challan {
+  id              String        @id @default(uuid())
+  challanNumber   String        @unique @map("challan_number")
+  vehicleId       String        @map("vehicle_id")
+  officerId       String        @map("officer_id")
+  fineAmount      Decimal       @map("fine_amount") @db.Decimal(10, 2)
+  description     String?
+  gpsLatitude     Decimal?      @map("gps_latitude") @db.Decimal(10, 7)
+  gpsLongitude    Decimal?      @map("gps_longitude") @db.Decimal(10, 7)
+  address         String?
+  incidentDate    DateTime      @map("incident_date")
+  incidentTime    String        @map("incident_time")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  status          ChallanStatus @default(PENDING)
+  approvedBy      String?       @map("approved_by")
+  approvedAt      DateTime?     @map("approved_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  deletedAt       DateTime?     @map("deleted_at")
+
+  vehicle           Vehicle            @relation(fields: [vehicleId], references: [id])
+  officer           User               @relation("ChallanOfficer", fields: [officerId], references: [id])
+  challanViolations ChallanViolation[]
+  evidences         Evidence[]
+  payments          Payment[]
+  disputes          ChallanDispute[]
+  flaggedDetection  FlaggedDetection?
+
+  @@index([vehicleId])
+  @@index([officerId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([challanNumber])
+  @@map("challans")
+}
+
+// ==========================================================
+// FLAGGED DETECTION (remote-model violation screening queue)
+// ==========================================================
+// A photo an officer submitted to the screening pipeline (ml-service)
+// that came back as a two-wheeler with a confident violation. Sits in a
+// review queue until a Traffic Police / Super Admin officer either
+// converts it into an actual Challan or dismisses it as a false positive.
+// The model never creates a Challan itself — a human always does that.
+
+model FlaggedDetection {
+  id                String                  @id @default(uuid())
+  submittedById     String                  @map("submitted_by_id")
+  vehicleType       String                  @map("vehicle_type")
+  violationLabel    String                  @map("violation_label")
+  confidence        Decimal                 @map("confidence") @db.Decimal(5, 4)
+  evidenceImagePath String                  @map("evidence_image_path")
+  platePreviewPaths String[]                @map("plate_preview_paths")
+  sourceType        String                  @default("photo") @map("source_type") // "photo" | "video"
+  frameTimestampSec Decimal?                @map("frame_timestamp_sec") @db.Decimal(8, 2) // set when sourceType = "video"
+  status            FlaggedDetectionStatus  @default(PENDING_REVIEW)
+  challanId         String?                 @unique @map("challan_id")
+  reviewedBy        String?                 @map("reviewed_by")
+  reviewedAt        DateTime?               @map("reviewed_at")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+
+  submittedBy User     @relation(fields: [submittedById], references: [id])
+  challan     Challan? @relation(fields: [challanId], references: [id])
+
+  @@index([submittedById])
+  @@index([status])
+  @@map("flagged_detections")
+}
+
+// ==========================================================
+// CHALLAN DISPUTE (citizen appeal — "I didn't do it")
+// ==========================================================
+
+model ChallanDispute {
+  id             String               @id @default(uuid())
+  challanId      String               @map("challan_id")
+  raisedById     String               @map("raised_by_id")
+  reason         String
+  status         ChallanDisputeStatus @default(PENDING)
+  reviewedBy     String?              @map("reviewed_by")
+  reviewedAt     DateTime?            @map("reviewed_at")
+  resolutionNote String?              @map("resolution_note")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+
+  challan  Challan @relation(fields: [challanId], references: [id])
+  raisedBy User    @relation(fields: [raisedById], references: [id])
+
+  @@index([challanId])
+  @@index([raisedById])
+  @@index([status])
+  @@map("challan_disputes")
+}
+
+model ChallanViolation {
+  id          String   @id @default(uuid())
+  challanId   String   @map("challan_id")
+  violationId String   @map("violation_id")
+  fineAmount  Decimal  @map("fine_amount") @db.Decimal(10, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  challan   Challan   @relation(fields: [challanId], references: [id], onDelete: Cascade)
+  violation Violation @relation(fields: [violationId], references: [id])
+
+  @@unique([challanId, violationId])
+  @@index([challanId])
+  @@index([violationId])
+  @@map("challan_violations")
+}
+
+enum EvidenceType {
+  IMAGE
+  VIDEO
+}
+
+model Evidence {
+  id        String       @id @default(uuid())
+  challanId String       @map("challan_id")
+  type      EvidenceType
+  url       String
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  challan Challan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+
+  @@index([challanId])
+  @@map("evidences")
+}
+
+// ==========================================================
+// PAYMENT
+// ==========================================================
+
+model Payment {
+  id            String        @id @default(uuid())
+  challanId     String        @map("challan_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod @map("payment_method")
+  transactionId String?       @unique @map("transaction_id")
+  gatewayResponse Json?       @map("gateway_response")
+  paymentDate   DateTime?     @map("payment_date")
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  challan Challan @relation(fields: [challanId], references: [id])
+
+  @@index([challanId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ==========================================================
+// AUDIT LOG
+// ==========================================================
+
+model AuditLog {
+  id        String      @id @default(uuid())
+  userId    String?     @map("user_id")
+  action    AuditAction
+  details   Json?
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
