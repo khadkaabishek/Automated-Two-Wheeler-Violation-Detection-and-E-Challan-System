@@ -2,9 +2,9 @@ import { IconCar, IconTicket, IconCoin, IconGavel, IconBadge, IconShield } from 
 
 const FEATURES = [
   { icon: IconCar, text: 'Register your vehicles online and track approval status' },
-  { icon: IconTicket, text: 'View every citation issued against your vehicles, in real time' },
+  { icon: IconTicket, text: 'View every violation issued against your vehicles, in real time' },
   { icon: IconCoin, text: "Submit payment requests and get notified the moment they're confirmed" },
-  { icon: IconGavel, text: 'Dispute a citation you believe was issued in error' },
+  { icon: IconGavel, text: 'Dispute a violation you believe was issued in error' },
   { icon: IconBadge, text: 'Apply to join as a Traffic Police officer' },
 ];
 
@@ -26,11 +26,11 @@ export default function PortalInfoPanel() {
           className="sidebar__mark"
           style={{ width: 44, height: 44, fontSize: 18, background: '#fff', color: 'var(--civic-blue-900)' }}
         >
-          EC
+          ST
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 21 }}>E-Challan</div>
-          <div style={{ fontSize: 11, letterSpacing: '0.06em', opacity: 0.7 }}>CITIZEN PORTAL</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 21 }}>Smart Traffic</div>
+          <div style={{ fontSize: 11, letterSpacing: '0.06em', opacity: 0.7 }}>PUBLIC PORTAL</div>
         </div>
       </div>
 
@@ -43,11 +43,11 @@ export default function PortalInfoPanel() {
           margin: '0 0 12px',
         }}
       >
-        Traffic citations, vehicle registration, and fine payments — all in one place.
+        AI-powered violation detection, vehicle registration, and fine payments — all in one place.
       </h1>
       <p style={{ fontSize: 14, opacity: 0.8, lineHeight: 1.6, margin: '0 0 32px', maxWidth: 420 }}>
         A digital platform connecting citizens, traffic officers, and administrators around every
-        vehicle citation — from the moment it's issued to the moment it's paid or resolved.
+        vehicle violation — from the moment it's issued to the moment it's paid or resolved.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -85,7 +85,7 @@ export default function PortalInfoPanel() {
         }}
       >
         <IconShield size={15} color="#fff" />
-        Role-based access control — you only ever see your own vehicles and citations.
+        Role-based access control — you only ever see your own vehicles and violations.
       </div>
     </div>
   );

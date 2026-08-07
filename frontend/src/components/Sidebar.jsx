@@ -22,7 +22,7 @@ const NAV = [
     items: [
       { to: '/vehicles', label: 'Vehicles', icon: '⛋', permission: 'vehicle:read' },
       { to: '/owners', label: 'Owners', icon: '☺', permission: 'owner:read' },
-      { to: '/violations', label: 'Violations', icon: '!', permission: 'violation:read' },
+      { to: '/violations', label: 'Violation Types', icon: '!', permission: 'violation:read' },
     ],
   },
   {
@@ -49,10 +49,10 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__brand">
-        <div className="sidebar__mark">EC</div>
+        <div className="sidebar__mark">ST</div>
         <div>
-          <div className="sidebar__title">E-Challan</div>
-          <div className="sidebar__subtitle">CITIZEN PORTAL</div>
+          <div className="sidebar__title">Smart Traffic</div>
+          <div className="sidebar__subtitle">VIOLATION MANAGEMENT</div>
         </div>
       </div>
 

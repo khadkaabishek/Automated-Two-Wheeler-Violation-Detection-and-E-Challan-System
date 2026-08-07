@@ -5,11 +5,12 @@ import { dashboardApi } from '../../api/dashboard';
 import { challanApi } from '../../api/challans';
 import { paymentApi } from '../../api/payments';
 import { disputeApi } from '../../api/disputes';
+import { flaggedDetectionApi } from '../../api/flaggedDetections';
 import StatCard from '../../components/StatCard';
 import Loader from '../../components/Loader';
 import StatusBadge from '../../components/StatusBadge';
 import AIDetectionBanner from '../../components/AIDetectionBanner';
-import { IconBadge, IconTicket, IconCoin, IconGavel } from '../../components/icons';
+import { IconBadge, IconTicket, IconCoin, IconGavel, IconWarning } from '../../components/icons';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,22 +22,25 @@ export default function TrafficDashboard() {
   const [pendingChallanCount, setPendingChallanCount] = useState(0);
   const [pendingPaymentCount, setPendingPaymentCount] = useState(0);
   const [pendingDisputeCount, setPendingDisputeCount] = useState(0);
+  const [pendingNewViolations, setPendingNewViolations] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [d, pc, pp, pd] = await Promise.all([
+        const [d, pc, pp, pd, pnv] = await Promise.all([
           dashboardApi.dailyChallans(14),
           challanApi.list({ status: 'PENDING', limit: 5 }),
           paymentApi.list({ status: 'PENDING', limit: 1 }),
           disputeApi.list({ status: 'PENDING', limit: 1 }),
+          flaggedDetectionApi.list({ status: 'PENDING_REVIEW', limit: 1 }),
         ]);
         setDaily(d.map((x) => ({ ...x, date: x.date?.slice(5) })));
         setPendingChallans(pc.challans);
         setPendingChallanCount(pc.meta.total);
         setPendingPaymentCount(pp.meta.total);
         setPendingDisputeCount(pd.meta.total);
+        setPendingNewViolations(pnv.meta.total);
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -58,16 +62,29 @@ export default function TrafficDashboard() {
           </div>
           <div className="page-sub">Welcome back, {user?.fullName?.split(' ')[0]} — here's what needs attention</div>
         </div>
-        <Link to="/challans" className="btn btn-warn">
-          + Issue citation
-        </Link>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {pendingNewViolations > 0 && (
+            <Link to="/new-violations" className="btn btn-ghost">
+              {pendingNewViolations} new violation{pendingNewViolations === 1 ? '' : 's'} detected
+            </Link>
+          )}
+          <Link to="/challans" className="btn btn-warn">
+            + Issue violation
+          </Link>
+        </div>
       </div>
 
       <AIDetectionBanner />
 
       <div className="stat-grid">
         <StatCard
-          label="Citations Awaiting Approval"
+          label="New Violations Detected"
+          value={pendingNewViolations}
+          color="red"
+          icon={<IconWarning size={18} />}
+        />
+        <StatCard
+          label="Violations Awaiting Approval"
           value={pendingChallanCount}
           color="red"
           icon={<IconTicket size={18} />}
@@ -85,7 +102,7 @@ export default function TrafficDashboard() {
         <div className="card">
           <div className="card__header">
             <div>
-              <div className="card__title">Citations trend</div>
+              <div className="card__title">Violations trend</div>
               <div className="card__desc">Trailing 14 days</div>
             </div>
           </div>

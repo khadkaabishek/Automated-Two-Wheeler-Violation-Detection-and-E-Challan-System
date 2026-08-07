@@ -78,8 +78,8 @@ export default function MyProfile() {
           <div className="page-title">My Owner Profile</div>
           <div className="page-sub">
             {profile
-              ? 'Identity details linked to your vehicles and citations'
-              : 'Complete this once to request vehicle registrations and view citations against your vehicles'}
+              ? 'Identity details linked to your vehicles and violations'
+              : 'Complete this once to request vehicle registrations and view violations against your vehicles'}
           </div>
         </div>
       </div>

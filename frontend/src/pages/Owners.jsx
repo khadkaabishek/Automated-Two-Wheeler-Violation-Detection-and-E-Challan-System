@@ -103,7 +103,7 @@ export default function Owners() {
       <div className="page-header">
         <div>
           <div className="page-title">Vehicle Owners</div>
-          <div className="page-sub">Registered owners linked to vehicles and citations</div>
+          <div className="page-sub">Registered owners linked to vehicles and violations</div>
         </div>
         {hasPermission('owner:create') && (
           <button className="btn btn-primary" onClick={openCreate}>

@@ -13,6 +13,7 @@ import Loader from '../components/Loader';
 import StatusBadge from '../components/StatusBadge';
 import TicketCard from '../components/TicketCard';
 import VehiclePicker from '../components/VehiclePicker';
+import DetectionResultModal from '../components/DetectionResultModal';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
@@ -34,6 +35,8 @@ const EMPTY_FORM = {
 
 export default function Challans() {
   const toast = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { hasPermission, hasRole } = useAuth();
   const location = useLocation();
   const [challans, setChallans] = useState([]);
@@ -51,6 +54,10 @@ export default function Challans() {
   const [violationOptions, setViolationOptions] = useState([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+
+  const [analyzeFile, setAnalyzeFile] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeResult, setAnalyzeResult] = useState(null);
 
   const [detailId, setDetailId] = useState(null);
   const [detail, setDetail] = useState(null);
@@ -85,6 +92,8 @@ export default function Challans() {
   const openCreate = async (prefillData = null) => {
     setForm(EMPTY_FORM);
     setCreateOpen(true);
+    setAnalyzeFile(null);
+    setAnalyzeResult(null);
     try {
       const res = await violationApi.list({ isActive: 'true', limit: 100 });
       setViolationOptions(res.violations);
@@ -200,7 +209,7 @@ export default function Challans() {
     try {
       const updated = await challanApi[action](detailId);
       setDetail(updated);
-      toast.success(`Challan ${ACTION_PAST_TENSE[action]}`);
+      toast.success(`Violation ${ACTION_PAST_TENSE[action]}`);
       load();
     } catch (err) {
       toast.error(err.message);
@@ -246,12 +255,12 @@ export default function Challans() {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-title">Challans</div>
-          <div className="page-sub">Citations issued, their status, and the enforcement trail</div>
+          <div className="page-title">Violations</div>
+          <div className="page-sub">Violations issued, their status, and the enforcement trail</div>
         </div>
         {hasPermission('challan:create') && (
-          <button className="btn btn-warn" onClick={openCreate}>
-            + Issue challan
+          <button className="btn btn-warn" onClick={() => openCreate()}>
+            + Issue violation notice
           </button>
         )}
       </div>
@@ -260,7 +269,7 @@ export default function Challans() {
         <div className="filter-bar">
           <input
             className="input search-input"
-            placeholder="Search challan number or plate…"
+            placeholder="Search violation number or plate…"
             value={search}
             onChange={(e) => {
               setPage(1);
@@ -287,13 +296,13 @@ export default function Challans() {
         {loading ? (
           <Loader />
         ) : challans.length === 0 ? (
-          <EmptyState title="No challans found" desc="Issue a citation to see it appear here." />
+          <EmptyState title="No violations found" desc="Issue a violation to see it appear here." />
         ) : (
           <div className="table-wrap">
             <table className="dtable">
               <thead>
                 <tr>
-                  <th>Challan #</th>
+                  <th>Violation #</th>
                   <th>Vehicle</th>
                   <th>Officer</th>
                   <th>Fine</th>
@@ -333,10 +342,70 @@ export default function Challans() {
 
       {/* ---- Create modal ---- */}
       {createOpen && (
-        <Modal title="Issue challan" onClose={() => setCreateOpen(false)} wide>
+        <Modal title="Issue violation notice" onClose={() => setCreateOpen(false)} wide>
           <form onSubmit={handleCreate}>
+            {form.evidenceImagePath && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  background: 'var(--signal-red-bg)',
+                  border: '1px solid #efc3c8',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 10,
+                  marginBottom: 16,
+                }}
+              >
+                <img
+                  src={`${FILE_ORIGIN}${form.evidenceImagePath}`}
+                  alt="Flagged detection evidence"
+                  style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 6, flexShrink: 0 }}
+                />
+                <div style={{ fontSize: 12.5, color: 'var(--civic-red)' }}>
+                  Creating this from a flagged detection — find and select the matching vehicle below.
+                  The suggested violation is already checked.
+                </div>
+              </div>
+            )}
             <Field label="Vehicle" full>
               <VehiclePicker value={form.vehicle} onChange={(v) => setForm({ ...form, vehicle: v })} />
+            </Field>
+
+            <Field label="Analyze a photo (optional)" full>
+              <div
+                style={{
+                  background: 'var(--surface-alt)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: 12,
+                }}
+              >
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <input
+                    className="input"
+                    type="file"
+                    accept="image/*"
+                    style={{ maxWidth: 260 }}
+                    onChange={(e) => {
+                      setAnalyzeFile(e.target.files[0] || null);
+                      setAnalyzeResult(null);
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    disabled={!analyzeFile || analyzing}
+                    onClick={runAnalyze}
+                  >
+                    {analyzing ? <span className="spinner" /> : 'Detect violations'}
+                  </button>
+                </div>
+                <div className="field-hint" style={{ marginTop: 8 }}>
+                  Runs the photo through the full detection pipeline. Suggestions are advisory —
+                  review and confirm before issuing.
+                </div>
+              </div>
             </Field>
 
             <Field label="Violations" full>
@@ -413,16 +482,32 @@ export default function Challans() {
                 Cancel
               </button>
               <button type="submit" className="btn btn-warn" disabled={saving}>
-                {saving ? <span className="spinner" /> : 'Issue challan'}
+                {saving ? <span className="spinner" /> : 'Issue violation notice'}
               </button>
             </div>
           </form>
         </Modal>
       )}
 
+      {/* ---- AI detection result popup ---- */}
+      {analyzeResult && (
+        <DetectionResultModal
+          result={analyzeResult}
+          onClose={() => setAnalyzeResult(null)}
+          onApplyViolation={(name) => {
+            applySuggestedViolation(name);
+          }}
+          footer={
+            <button type="button" className="btn btn-primary" onClick={() => setAnalyzeResult(null)}>
+              Done reviewing
+            </button>
+          }
+        />
+      )}
+
       {/* ---- Detail modal ---- */}
       {detailId && (
-        <Modal title="Citation detail" onClose={() => setDetailId(null)} wide>
+        <Modal title="Violation detail" onClose={() => setDetailId(null)} wide>
           {detailLoading || !detail ? (
             <Loader />
           ) : (
@@ -460,10 +545,10 @@ export default function Challans() {
               {disputeOpen && (
                 <div className="card" style={{ marginTop: 16, borderColor: 'var(--civic-red-dim)' }}>
                   <div className="card__title" style={{ fontSize: 13, color: 'var(--civic-red)', marginBottom: 10 }}>
-                    Dispute this citation
+                    Dispute this violation
                   </div>
                   <form onSubmit={submitDispute}>
-                    <Field label="Why do you believe this citation is incorrect?">
+                    <Field label="Why do you believe this violation is incorrect?">
                       <textarea
                         className="textarea"
                         required

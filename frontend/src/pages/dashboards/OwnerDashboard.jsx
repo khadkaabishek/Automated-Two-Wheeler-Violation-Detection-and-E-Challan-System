@@ -55,7 +55,7 @@ export default function OwnerDashboard() {
               <IconCar size={24} color="var(--civic-blue-700)" />
               Welcome
             </div>
-            <div className="page-sub">Set up your owner profile to register a vehicle and track citations</div>
+            <div className="page-sub">Set up your owner profile to register a vehicle and track violations</div>
           </div>
         </div>
         <AIDetectionBanner />
@@ -85,7 +85,7 @@ export default function OwnerDashboard() {
             <IconCar size={24} color="var(--civic-blue-700)" />
             My Dashboard
           </div>
-          <div className="page-sub">Vehicles registered to you and citations issued against them</div>
+          <div className="page-sub">Vehicles registered to you and violations issued against them</div>
         </div>
       </div>
 
@@ -99,7 +99,7 @@ export default function OwnerDashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <IconWarning size={18} color="var(--civic-red)" />
             <span style={{ fontSize: 13.5, color: 'var(--civic-red)', fontWeight: 600 }}>
-              You have {outstanding} citation{outstanding === 1 ? '' : 's'} awaiting payment
+              You have {outstanding} violation{outstanding === 1 ? '' : 's'} awaiting payment
             </span>
             <Link to="/payments" className="btn btn-warn btn-sm" style={{ marginLeft: 'auto' }}>
               Pay now
@@ -110,7 +110,7 @@ export default function OwnerDashboard() {
 
       <div className="stat-grid">
         <StatCard label="My Vehicles" value={vehicles.length} color="blue" icon={<IconCar size={18} />} />
-        <StatCard label="Total Citations" value={challans.length} color="amber" icon={<IconTicket size={18} />} />
+        <StatCard label="Total Violations" value={challans.length} color="amber" icon={<IconTicket size={18} />} />
         <StatCard label="Awaiting Payment" value={outstanding} color="red" icon={<IconWarning size={18} />} />
         <StatCard label="Open Disputes" value={pendingDisputes} color="red" icon={<IconGavel size={18} />} />
       </div>
@@ -156,13 +156,13 @@ export default function OwnerDashboard() {
 
         <div className="card">
           <div className="card__header">
-            <div className="card__title">Recent citations</div>
+            <div className="card__title">Recent violations</div>
             <Link to="/challans" className="btn btn-ghost btn-sm">
               View all
             </Link>
           </div>
           {challans.length === 0 ? (
-            <div style={{ color: 'var(--ink-500)', fontSize: 13 }}>No citations on record. Good driving.</div>
+            <div style={{ color: 'var(--ink-500)', fontSize: 13 }}>No violations on record. Good driving.</div>
           ) : (
             challans.map((c) => (
               <div

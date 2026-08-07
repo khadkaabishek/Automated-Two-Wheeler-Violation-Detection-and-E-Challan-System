@@ -86,7 +86,7 @@ export default function Login() {
             </Link>
           </div>
           <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: 'var(--ink-300)' }}>
-            Seeded default: superadmin@echallan.gov.np
+            Seeded default: superadmin@smarttraffic.gov.np
           </div>
         </div>
       </div>

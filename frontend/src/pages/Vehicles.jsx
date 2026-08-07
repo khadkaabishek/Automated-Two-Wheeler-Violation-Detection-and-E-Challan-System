@@ -243,7 +243,7 @@ export default function Vehicles() {
         {loading ? (
           <Loader />
         ) : vehicles.length === 0 ? (
-          <EmptyState title="No vehicles found" desc="Register a vehicle to start issuing challans against it." />
+          <EmptyState title="No vehicles found" desc="Register a vehicle to start issuing violation notices against it." />
         ) : (
           <div className="table-wrap">
             <table className="dtable">

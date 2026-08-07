@@ -15,10 +15,11 @@ import { dashboardApi } from '../../api/dashboard';
 import { vehicleApi } from '../../api/vehicles';
 import { officerApplicationApi } from '../../api/officerApplications';
 import { disputeApi } from '../../api/disputes';
+import { flaggedDetectionApi } from '../../api/flaggedDetections';
 import StatCard from '../../components/StatCard';
 import Loader from '../../components/Loader';
 import AIDetectionBanner from '../../components/AIDetectionBanner';
-import { IconShield, IconUsers, IconCar, IconCoin, IconTicket, IconGavel } from '../../components/icons';
+import { IconShield, IconUsers, IconCar, IconCoin, IconTicket, IconGavel, IconWarning } from '../../components/icons';
 import { useToast } from '../../context/ToastContext';
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -31,18 +32,20 @@ export default function SuperAdminDashboard() {
   const [pendingVehicles, setPendingVehicles] = useState(0);
   const [pendingOfficerApps, setPendingOfficerApps] = useState(0);
   const [pendingDisputes, setPendingDisputes] = useState(0);
+  const [pendingNewViolations, setPendingNewViolations] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const [s, d, r, pv, poa, pd] = await Promise.all([
+        const [s, d, r, pv, poa, pd, pnv] = await Promise.all([
           dashboardApi.summary(),
           dashboardApi.dailyChallans(30),
           dashboardApi.monthlyRevenue(),
           vehicleApi.list({ status: 'PENDING_APPROVAL', limit: 1 }),
           officerApplicationApi.list({ status: 'PENDING', limit: 1 }),
           disputeApi.list({ status: 'PENDING', limit: 1 }),
+          flaggedDetectionApi.list({ status: 'PENDING_REVIEW', limit: 1 }),
         ]);
         setSummary(s);
         setDaily(d.map((x) => ({ ...x, date: x.date?.slice(5) })));
@@ -50,6 +53,7 @@ export default function SuperAdminDashboard() {
         setPendingVehicles(pv.meta.total);
         setPendingOfficerApps(poa.meta.total);
         setPendingDisputes(pd.meta.total);
+        setPendingNewViolations(pnv.meta.total);
       } catch (err) {
         toast.error(err.message);
       } finally {
@@ -61,7 +65,7 @@ export default function SuperAdminDashboard() {
 
   if (loading) return <Loader label="Loading system overview…" />;
 
-  const pendingTotal = pendingVehicles + pendingOfficerApps + pendingDisputes;
+  const pendingTotal = pendingVehicles + pendingOfficerApps + pendingDisputes + pendingNewViolations;
 
   return (
     <div>
@@ -71,7 +75,7 @@ export default function SuperAdminDashboard() {
             <IconShield size={24} color="var(--civic-blue-700)" />
             System Overview
           </div>
-          <div className="page-sub">Full visibility across every citizen, officer, and citation</div>
+          <div className="page-sub">Full visibility across every citizen, officer, and violation</div>
         </div>
       </div>
 
@@ -98,6 +102,11 @@ export default function SuperAdminDashboard() {
               </span>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {pendingNewViolations > 0 && (
+                <Link to="/new-violations" className="btn btn-warn btn-sm">
+                  {pendingNewViolations} new violation{pendingNewViolations === 1 ? '' : 's'} detected
+                </Link>
+              )}
               {pendingVehicles > 0 && (
                 <Link to="/vehicles" className="btn btn-warn btn-sm">
                   {pendingVehicles} vehicle{pendingVehicles === 1 ? '' : 's'} to approve
@@ -121,9 +130,9 @@ export default function SuperAdminDashboard() {
       <div className="stat-grid">
         <StatCard label="Total Users" value={summary?.totalUsers ?? '—'} color="blue" icon={<IconUsers size={18} />} />
         <StatCard label="Total Vehicles" value={summary?.totalVehicles ?? '—'} color="blue" icon={<IconCar size={18} />} />
-        <StatCard label="Total Citations" value={summary?.totalChallans ?? '—'} color="amber" icon={<IconTicket size={18} />} />
-        <StatCard label="Pending Citations" value={summary?.pendingChallans ?? '—'} color="red" icon={<IconTicket size={18} />} />
-        <StatCard label="Paid Citations" value={summary?.paidChallans ?? '—'} color="green" icon={<IconCoin size={18} />} />
+        <StatCard label="Total Violations" value={summary?.totalChallans ?? '—'} color="amber" icon={<IconTicket size={18} />} />
+        <StatCard label="Pending Violations" value={summary?.pendingChallans ?? '—'} color="red" icon={<IconTicket size={18} />} />
+        <StatCard label="Paid Violations" value={summary?.paidChallans ?? '—'} color="green" icon={<IconCoin size={18} />} />
         <StatCard
           label="Total Revenue"
           value={`Rs ${Number(summary?.totalRevenue ?? 0).toLocaleString()}`}
@@ -136,7 +145,7 @@ export default function SuperAdminDashboard() {
         <div className="card">
           <div className="card__header">
             <div>
-              <div className="card__title">Daily citations</div>
+              <div className="card__title">Daily violations</div>
               <div className="card__desc">Trailing 30 days, system-wide</div>
             </div>
           </div>
@@ -174,7 +183,11 @@ export default function SuperAdminDashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16 }}>
+        <Link to="/new-violations" className="card" style={{ textDecoration: 'none' }}>
+          <IconWarning size={18} color="var(--civic-red)" />
+          <div style={{ fontWeight: 600, fontSize: 13, marginTop: 8, color: 'var(--ink-900)' }}>New Violations</div>
+        </Link>
         <Link to="/users" className="card" style={{ textDecoration: 'none' }}>
           <IconUsers size={18} color="var(--civic-blue-700)" />
           <div style={{ fontWeight: 600, fontSize: 13, marginTop: 8, color: 'var(--ink-900)' }}>Manage Users</div>

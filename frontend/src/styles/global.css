@@ -568,6 +568,10 @@ table.dtable {
   max-width: 760px;
 }
 
+.modal--large {
+  max-width: 980px;
+}
+
 .modal__header {
   display: flex;
   align-items: center;

@@ -49,10 +49,10 @@ export default function Disputes() {
     try {
       if (noteTarget.decision === 'UPHELD') {
         await disputeApi.uphold(noteTarget.dispute.id, note);
-        toast.success('Dispute upheld — citation voided');
+        toast.success('Dispute upheld — violation voided');
       } else {
         await disputeApi.dismiss(noteTarget.dispute.id, note);
-        toast.success('Dispute dismissed — citation stands');
+        toast.success('Dispute dismissed — violation stands');
       }
       setNoteTarget(null);
       load();
@@ -69,9 +69,9 @@ export default function Disputes() {
         <div>
           <div className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <IconGavel size={22} color="var(--civic-red)" />
-            Citation Disputes
+            Violation Disputes
           </div>
-          <div className="page-sub">Citizens appealing a citation they believe was issued in error</div>
+          <div className="page-sub">Citizens appealing a violation they believe was issued in error</div>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export default function Disputes() {
             <table className="dtable">
               <thead>
                 <tr>
-                  <th>Citation</th>
+                  <th>Violation</th>
                   <th>Raised by</th>
                   <th>Reason</th>
                   <th>Status</th>
@@ -141,7 +141,7 @@ export default function Disputes() {
       {noteTarget && (
         <Modal
           title={
-            noteTarget.decision === 'UPHELD' ? 'Uphold dispute — void citation' : 'Dismiss dispute — citation stands'
+            noteTarget.decision === 'UPHELD' ? 'Uphold dispute — void violation' : 'Dismiss dispute — violation stands'
           }
           onClose={() => setNoteTarget(null)}
         >
@@ -179,7 +179,7 @@ export default function Disputes() {
                 {actionLoading ? (
                   <span className="spinner" />
                 ) : noteTarget.decision === 'UPHELD' ? (
-                  'Uphold & void citation'
+                  'Uphold & void violation'
                 ) : (
                   'Dismiss dispute'
                 )}

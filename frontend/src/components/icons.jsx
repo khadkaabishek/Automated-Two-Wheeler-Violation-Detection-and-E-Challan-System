@@ -46,7 +46,7 @@ export const IconCar = ({ size = 20, color = 'currentColor' }) =>
     </>
   ));
 
-// Document/ticket — citation
+// Document/ticket — violation
 export const IconTicket = ({ size = 20, color = 'currentColor' }) =>
   base(size, color, (
     <>

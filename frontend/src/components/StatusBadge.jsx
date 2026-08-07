@@ -19,7 +19,10 @@ const STATUS_COLOR = {
   REFUNDED: 'blue',
   // Dispute status
   UPHELD: 'red',
-  DISMISSED: 'green',
+  DISMISSED: 'grey',
+  // Flagged detection status
+  PENDING_REVIEW: 'amber',
+  CONVERTED: 'green',
 };
 
 export default function StatusBadge({ status }) {
