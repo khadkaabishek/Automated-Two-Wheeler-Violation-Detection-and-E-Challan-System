@@ -25,7 +25,15 @@ const STATUS_COLOR = {
   CONVERTED: 'green',
 };
 
-export default function StatusBadge({ status }) {
+export default function StatusBadge({ status, customLabel }) {
+  const getBadgeVariant = (st) => {
+    switch ((st || '').toUpperCase()) {
+      case 'PAID': case 'APPROVED': return 'badge-success';
+      case 'PENDING': case 'REVIEW': return 'badge-warning';
+      case 'OVERDUE': case 'REJECTED': case 'CANCELLED': return 'badge-danger';
+      default: return 'badge-secondary';
+    }
+  };
   const color = STATUS_COLOR[status] || 'grey';
   return (
     <span className={`badge badge-${color}`}>
