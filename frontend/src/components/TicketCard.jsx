@@ -21,7 +21,14 @@ export default function TicketCard({ challan, children }) {
       </div>
 
       <div className="ticket__serial">{challan.challanNumber}</div>
-      <div className="ticket__plate">{challan.vehicle?.vehicleNumber}</div>
+      <div className="ticket__plate">
+        {challan.vehicle?.vehicleNumber}
+        {challan.description?.includes('Automated AI Detection') && (
+          <span className="chip" style={{ marginLeft: 8, background: 'var(--civic-gold)', color: '#000', fontSize: '0.7rem' }}>
+            🤖 AI Draft
+          </span>
+        )}
+      </div>
 
       <div className="ticket__grid">
         <div>

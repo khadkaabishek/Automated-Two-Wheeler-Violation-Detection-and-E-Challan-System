@@ -9,6 +9,7 @@ export const MODULES = Object.freeze({
   DASHBOARD_ACCESS: 'Dashboard Access',
   REPORT_GENERATION: 'Report Generation',
   SYSTEM_SETTINGS: 'System Settings',
+  LIVE_MONITORING: 'Live Monitoring',
 });
 
 const ACTIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
@@ -24,6 +25,7 @@ const moduleKeyMap = {
   [MODULES.DASHBOARD_ACCESS]: 'DASHBOARD',
   [MODULES.REPORT_GENERATION]: 'REPORT',
   [MODULES.SYSTEM_SETTINGS]: 'SETTINGS',
+  [MODULES.LIVE_MONITORING]: 'LIVE_MONITORING',
 };
 
 /**

@@ -11,12 +11,21 @@ const fullInclude = {
 export const challanRepository = {
   create: (data) => prisma.challan.create({ data, include: fullInclude }),
 
-  createWithViolations: ({ challanData, violationLinks }) =>
+  createWithViolations: ({ challanData, violationLinks, aiSnapshotUrl }) =>
     prisma.$transaction(async (tx) => {
       const challan = await tx.challan.create({ data: challanData });
       await tx.challanViolation.createMany({
         data: violationLinks.map((v) => ({ ...v, challanId: challan.id })),
       });
+      if (aiSnapshotUrl) {
+        await tx.evidence.create({
+          data: {
+            challanId: challan.id,
+            type: 'IMAGE',
+            url: aiSnapshotUrl
+          }
+        });
+      }
       return tx.challan.findUnique({ where: { id: challan.id }, include: fullInclude });
     }),
 

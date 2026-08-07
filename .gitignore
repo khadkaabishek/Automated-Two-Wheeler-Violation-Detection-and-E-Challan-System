@@ -4,7 +4,7 @@
 
 # Dependencies
 node_modules/
-
+package-lock.json
 # Build outputs
 dist/
 build/
@@ -141,3 +141,8 @@ Desktop.ini
 
 *.tmp
 *.temp
+runs
+backend/src/logs
+ML/Code/number_plate/evidence
+ML/Code/number_plate/plates
+backend/src/uploads

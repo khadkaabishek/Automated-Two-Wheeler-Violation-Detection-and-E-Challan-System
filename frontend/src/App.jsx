@@ -20,7 +20,8 @@ import MyProfile from './pages/MyProfile';
 import OfficerApply from './pages/OfficerApply';
 import OfficerApplications from './pages/OfficerApplications';
 import Disputes from './pages/Disputes';
-import NewViolations from './pages/NewViolations';
+import LiveMonitoring from './pages/LiveMonitoring';
+import ModelDetections from './pages/ModelDetections';
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
               }
             >
               <Route index element={<Dashboard />} />
+              <Route path="live-monitoring" element={<LiveMonitoring />} />
               <Route path="challans" element={<Challans />} />
               <Route path="payments" element={<Payments />} />
               <Route path="reports" element={<Reports />} />
@@ -52,7 +54,7 @@ export default function App() {
               <Route path="officer-application" element={<OfficerApply />} />
               <Route path="officer-applications" element={<OfficerApplications />} />
               <Route path="disputes" element={<Disputes />} />
-              <Route path="new-violations" element={<NewViolations />} />
+              <Route path="ai-detections" element={<ModelDetections />} />
             </Route>
           </Routes>
         </BrowserRouter>

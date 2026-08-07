@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { challanApi } from '../api/challans';
 import { violationApi } from '../api/violations';
 import { disputeApi } from '../api/disputes';
 import { aiDetectionApi } from '../api/aiDetection';
-import { FILE_ORIGIN } from '../api/client';
 import { toISODateTime } from '../utils/date';
 import Modal from '../components/Modal';
 import Field from '../components/Field';
@@ -17,6 +16,7 @@ import VehiclePicker from '../components/VehiclePicker';
 import DetectionResultModal from '../components/DetectionResultModal';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../api/client';
 
 const STATUS_OPTIONS = ['PENDING', 'APPROVED', 'PAID', 'CLOSED', 'REJECTED', 'CANCELLED'];
 
@@ -29,8 +29,8 @@ const EMPTY_FORM = {
   gpsLongitude: '',
   incidentDate: '',
   incidentTime: '',
-  flaggedDetectionId: null,
-  evidenceImagePath: null,
+  aiDetectionId: null,
+  aiSnapshotUrl: null,
 };
 
 export default function Challans() {
@@ -38,6 +38,7 @@ export default function Challans() {
   const location = useLocation();
   const navigate = useNavigate();
   const { hasPermission, hasRole } = useAuth();
+  const location = useLocation();
   const [challans, setChallans] = useState([]);
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -88,69 +89,52 @@ export default function Challans() {
     load();
   }, [load]);
 
-  const openCreate = async (prefill) => {
-    setForm({
-      ...EMPTY_FORM,
-      flaggedDetectionId: prefill?.flaggedDetectionId || null,
-      evidenceImagePath: prefill?.evidenceImagePath || null,
-    });
+  const openCreate = async (prefillData = null) => {
+    setForm(EMPTY_FORM);
     setCreateOpen(true);
     setAnalyzeFile(null);
     setAnalyzeResult(null);
     try {
       const res = await violationApi.list({ isActive: 'true', limit: 100 });
       setViolationOptions(res.violations);
-      if (prefill?.suggestedViolation) {
-        const match = res.violations.find(
-          (v) => v.name.toLowerCase() === prefill.suggestedViolation.toLowerCase()
-        );
-        if (match) {
-          setForm((f) => ({ ...f, violationIds: [match.id] }));
+      
+      if (prefillData) {
+        // We have prefill data from AI Detection
+        // 1. Try to find the vehicle
+        try {
+          const vRes = await api.get('/vehicles', { search: prefillData.aiPlateNumber });
+          if (vRes.vehicles?.length > 0) {
+            setForm(f => ({ ...f, vehicle: vRes.vehicles[0] }));
+          }
+        } catch (e) {
+           // Ignore
         }
+        
+        // 2. Map violation names to IDs
+        const matchedViolationIds = res.violations
+          .filter(v => prefillData.aiViolations.includes(v.name))
+          .map(v => v.id);
+          
+        setForm(f => ({
+          ...f,
+          violationIds: matchedViolationIds,
+          description: `Automated AI Detection - OCR Plate: ${prefillData.aiPlateNumber}`,
+          aiDetectionId: prefillData.aiDetectionId,
+          aiSnapshotUrl: prefillData.aiSnapshotUrl,
+        }));
       }
     } catch {
       /* non-fatal */
     }
   };
 
-  // Handoff from the New Violations queue: "Create violation notice" navigates
-  // here with state describing the flagged detection, so the create form
-  // opens pre-populated instead of the officer starting from a blank slate.
   useEffect(() => {
-    if (location.state?.flaggedDetectionId) {
-      openCreate({
-        flaggedDetectionId: location.state.flaggedDetectionId,
-        suggestedViolation: location.state.suggestedViolation,
-        evidenceImagePath: location.state.evidenceImagePath,
-      });
-      navigate(location.pathname, { replace: true, state: {} });
+    if (location.state?.autoOpenCreate) {
+      openCreate(location.state);
+      // Clear state so it doesn't reopen on refresh
+      window.history.replaceState({}, document.title);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const runAnalyze = async () => {
-    if (!analyzeFile) return toast.error('Choose a photo first');
-    setAnalyzing(true);
-    try {
-      const result = await aiDetectionApi.analyze(analyzeFile);
-      setAnalyzeResult(result);
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const applySuggestedViolation = (name) => {
-    const match = violationOptions.find((v) => v.name.toLowerCase() === name.toLowerCase());
-    if (!match) {
-      toast.error(`No "${name}" violation category exists yet — add it under Violations first`);
-      return;
-    }
-    if (!form.violationIds.includes(match.id)) {
-      toggleViolation(match.id);
-    }
-  };
+  }, [location.state]);
 
   const toggleViolation = (id) => {
     setForm((f) => ({
@@ -168,7 +152,7 @@ export default function Challans() {
 
     setSaving(true);
     try {
-      await challanApi.create({
+      const newChallan = await challanApi.create({
         vehicleId: form.vehicle.id,
         violationIds: form.violationIds,
         description: form.description || undefined,
@@ -177,9 +161,15 @@ export default function Challans() {
         gpsLongitude: form.gpsLongitude ? Number(form.gpsLongitude) : undefined,
         incidentDate: toISODateTime(form.incidentDate),
         incidentTime: form.incidentTime,
-        flaggedDetectionId: form.flaggedDetectionId || undefined,
+        aiSnapshotUrl: form.aiSnapshotUrl,
       });
-      toast.success('Violation issued');
+      
+      // If this came from an AI detection, mark it as PROCESSED
+      if (form.aiDetectionId) {
+        await aiDetectionApi.updateDetection(form.aiDetectionId, 'PROCESSED');
+      }
+
+      toast.success('Challan issued');
       setCreateOpen(false);
       load();
     } catch (err) {
@@ -329,6 +319,11 @@ export default function Challans() {
                     <td className="mono">Rs {Number(c.fineAmount).toLocaleString()}</td>
                     <td>
                       <StatusBadge status={c.status} />
+                      {c.description?.includes('Automated AI Detection') && (
+                        <span className="chip" style={{ marginLeft: 8, background: 'var(--civic-gold)', color: '#000', fontSize: '0.7rem' }}>
+                          🤖 AI Draft
+                        </span>
+                      )}
                     </td>
                     <td>
                       <button className="btn btn-ghost btn-sm" onClick={() => openDetail(c.id)}>
