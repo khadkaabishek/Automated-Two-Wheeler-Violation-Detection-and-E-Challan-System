@@ -1,0 +1,92 @@
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
+import { env } from '../config/env.js';
+import ApiError from '../utils/ApiError.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const uploadsRoot = path.join(__dirname, '..', 'uploads');
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+const VIDEO_TYPES = ['video/mp4', 'video/mpeg', 'video/quicktime', 'video/webm'];
+
+const destinationMap = {
+  avatar: 'avatars',
+  vehicleImage: 'vehicles',
+  evidenceImage: path.join('evidence', 'images'),
+  evidenceVideo: path.join('evidence', 'videos'),
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const subDir = destinationMap[file.fieldname] || 'misc';
+    cb(null, path.join(uploadsRoot, subDir));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${uuidv4()}${ext}`);
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === 'evidenceVideo') {
+    if (!VIDEO_TYPES.includes(file.mimetype)) {
+      return cb(ApiError.badRequest('Only mp4, mpeg, mov, or webm videos are allowed'));
+    }
+  } else {
+    if (!IMAGE_TYPES.includes(file.mimetype)) {
+      return cb(ApiError.badRequest('Only jpeg, jpg, png, or webp images are allowed'));
+    }
+  }
+  cb(null, true);
+};
+
+const maxSizeBytes =
+  Math.max(env.upload.maxFileSizeMb, env.upload.maxVideoSizeMb) * 1024 * 1024;
+
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: maxSizeBytes },
+});
+
+export const evidenceUpload = upload.fields([
+  { name: 'evidenceImage', maxCount: 10 },
+  { name: 'evidenceVideo', maxCount: 5 },
+]);
+
+// Used only for AI-detection analysis: the image is forwarded to the ML
+// service and never written to disk, so this uses memory storage instead
+// of the disk-backed `upload` above.
+const analyzeFileFilter = (req, file, cb) => {
+  const IMAGE_TYPES_LOCAL = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+  if (!IMAGE_TYPES_LOCAL.includes(file.mimetype)) {
+    return cb(ApiError.badRequest('Only jpeg, jpg, png, or webp images are allowed'));
+  }
+  cb(null, true);
+};
+
+export const analyzeUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: analyzeFileFilter,
+  limits: { fileSize: env.upload.maxFileSizeMb * 1024 * 1024 },
+}).single('image');
+
+// Video screening: same memory-storage approach as analyzeUpload (forwarded
+// to the ML service, never written to disk here), but accepts video and
+// uses the larger video size limit.
+const videoAnalyzeFileFilter = (req, file, cb) => {
+  if (!VIDEO_TYPES.includes(file.mimetype)) {
+    return cb(ApiError.badRequest('Only mp4, mpeg, mov, or webm videos are allowed'));
+  }
+  cb(null, true);
+};
+
+export const videoAnalyzeUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: videoAnalyzeFileFilter,
+  limits: { fileSize: env.upload.maxVideoSizeMb * 1024 * 1024 },
+}).single('video');
+
+export default upload;
