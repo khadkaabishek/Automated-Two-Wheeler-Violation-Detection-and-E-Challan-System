@@ -16,7 +16,7 @@ export const getMonthlyRevenue = asyncHandler(async (req, res) => {
 export const getDailyChallans = asyncHandler(async (req, res) => {
   const days = req.query.days ? parseInt(req.query.days, 10) : 30;
   const data = await dashboardService.getDailyChallans(days);
-  new ApiResponse(res, 200, 'Daily challan counts retrieved successfully', data);
+  new ApiResponse(res, 200, 'Daily violation counts retrieved successfully', data);
 });
 
 export const getTopViolations = asyncHandler(async (req, res) => {
@@ -26,5 +26,5 @@ export const getTopViolations = asyncHandler(async (req, res) => {
 
 export const getChallansByOfficer = asyncHandler(async (req, res) => {
   const data = await dashboardService.getChallansByOfficer();
-  new ApiResponse(res, 200, 'Challans by officer retrieved successfully', data);
+  new ApiResponse(res, 200, 'Violations by officer retrieved successfully', data);
 });

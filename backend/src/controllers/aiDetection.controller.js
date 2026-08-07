@@ -1,25 +1,32 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import * as aiDetectionService from '../services/aiDetection.service.js';
 
 /**
- * Placeholder for the planned Automatic Number Plate Recognition (ANPR) /
- * violation-detection model. Once a trained model is ready, wire its
- * inference call in here (or call out to a dedicated inference service)
- * and flip `enabled` to true. Until then this simply reports status so the
- * frontend can show an honest "in development" indicator instead of a dead
- * or fake feature.
+ * Reports whether the remote screening service (vehicle-type -> helmet ->
+ * plate staged pipeline, served by the separate /ml-service process) is
+ * reachable right now. This is genuinely live — not a hardcoded flag — so
+ * if that service is down, the dashboard banner says so honestly instead
+ * of claiming a feature that isn't currently working.
  */
 export const getStatus = asyncHandler(async (req, res) => {
+  const status = await aiDetectionService.checkServiceStatus();
+
   new ApiResponse(res, 200, 'AI detection status retrieved', {
-    enabled: false,
-    status: 'in_development',
-    message:
-      'Automatic violation detection (ANPR / overspeed / helmet detection) is currently being trained and is not yet issuing challans automatically.',
+    enabled: status.reachable,
+    status: status.reachable ? 'active' : 'unavailable',
+    message: status.reachable
+      ? 'Two-wheeler violation screening is live: vehicle type, then helmet, then plate location — upload a photo to try it.'
+      : `The detection service is not reachable right now (${status.detail || 'unknown reason'}). Violations can still be issued manually.`,
+    vehicleClasses: status.vehicleClasses || null,
+    helmetClasses: status.helmetClasses || null,
+    plateClasses: status.plateClasses || null,
     plannedCapabilities: [
-      'Automatic Number Plate Recognition (ANPR)',
-      'Helmet / seatbelt detection from camera feeds',
+      'Vehicle-type screening — only two-wheelers (motorcycle/scooter) are carried forward',
+      'Helmet / no-helmet detection, only run once a two-wheeler is confirmed',
+      'Number-plate location, only run once a violation is confirmed — reading the plate characters (OCR) is not yet trained',
       'Automatic overspeed detection',
-      'Auto-drafted challans for officer review before issuance',
     ],
   });
 });

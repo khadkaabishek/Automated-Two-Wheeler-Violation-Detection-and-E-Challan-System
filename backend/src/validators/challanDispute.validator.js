@@ -1,11 +1,11 @@
 import { body, param } from 'express-validator';
 
 export const createDisputeValidator = [
-  body('challanId').isUUID().withMessage('A valid citation ID is required'),
+  body('challanId').isUUID().withMessage('A valid violation ID is required'),
   body('reason')
     .trim()
     .notEmpty()
-    .withMessage('Please explain why you are disputing this citation')
+    .withMessage('Please explain why you are disputing this violation')
     .isLength({ max: 1000 }),
 ];
 

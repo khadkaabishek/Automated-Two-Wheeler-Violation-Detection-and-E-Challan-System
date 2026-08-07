@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/claude/echallan/backend/src/logs/.5f55932f47a411b56fc603d6f0b81326f773b588-audit.json",
+    "files": [
+        {
+            "date": 1786013503116,
+            "name": "/home/claude/echallan/backend/src/logs/combined-2026-08-06.log",
+            "hash": "6afe0781e49094f87535f957c75c4a9bbf56c02e3b9bac38aa3ac969a6afc7aa"
+        }
+    ],
+    "hashType": "sha256"
+}

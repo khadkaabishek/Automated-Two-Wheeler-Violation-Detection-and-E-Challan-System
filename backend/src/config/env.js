@@ -16,7 +16,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 5000,
   apiVersion: process.env.API_VERSION || 'v1',
-  appName: process.env.APP_NAME || 'E-Challan Management System',
+  appName: process.env.APP_NAME || 'Smart Traffic Violation Management System',
   appUrl: process.env.APP_URL || 'http://localhost:5000',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
 
@@ -53,7 +53,7 @@ export const env = {
     secure: process.env.SMTP_SECURE === 'true',
     user: process.env.SMTP_USER,
     password: process.env.SMTP_PASSWORD,
-    fromName: process.env.SMTP_FROM_NAME || 'E-Challan System',
+    fromName: process.env.SMTP_FROM_NAME || 'Smart Traffic System',
     fromEmail: process.env.SMTP_FROM_EMAIL,
   },
 
@@ -63,6 +63,20 @@ export const env = {
 
   log: {
     level: process.env.LOG_LEVEL || 'info',
+  },
+
+  mlService: {
+    // Remote inference service (see /ml-service) — a separate Python/FastAPI
+    // process wrapping the trained YOLOv8 helmet + plate detection models.
+    // Left unset in environments that don't run it; the AI detection status
+    // endpoint degrades gracefully to "unavailable" rather than erroring.
+    url: process.env.ML_SERVICE_URL || 'http://localhost:8000',
+    timeoutMs: parseInt(process.env.ML_SERVICE_TIMEOUT_MS, 10) || 15000,
+    // Video is sampled frame-by-frame server-side (up to 60 frames, each
+    // running the full staged pipeline) — even a short clip can take well
+    // over a minute on CPU, so this needs a much longer allowance than a
+    // single photo.
+    videoTimeoutMs: parseInt(process.env.ML_SERVICE_VIDEO_TIMEOUT_MS, 10) || 300000,
   },
 
   isProduction: process.env.NODE_ENV === 'production',

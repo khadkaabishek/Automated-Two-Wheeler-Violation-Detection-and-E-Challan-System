@@ -13,20 +13,20 @@ import { ROLES } from '../constants/roles.js';
  * Super Admin must explicitly approve or reject it (see approvePayment /
  * rejectPayment below). This matches the real-world workflow: an officer
  * confirms cash was actually received, or a bank/gateway reference is valid,
- * before a citation is considered settled.
+ * before a violation is considered settled.
  */
 export const createPayment = async (payload, actor, req) => {
   const challan = await challanRepository.findById(payload.challanId);
   if (!challan) {
-    throw ApiError.badRequest('Invalid challan ID');
+    throw ApiError.badRequest('Invalid violation ID');
   }
 
   if (actor.roleName === ROLES.VEHICLE_OWNER && challan.vehicle?.owner?.userId !== actor.id) {
-    throw ApiError.notFound('Invalid challan ID');
+    throw ApiError.notFound('Invalid violation ID');
   }
 
   if (challan.status !== 'APPROVED') {
-    throw ApiError.badRequest('Only APPROVED challans can be paid');
+    throw ApiError.badRequest('Only APPROVED violations can be paid');
   }
   if (Number(payload.amount) !== Number(challan.fineAmount)) {
     throw ApiError.badRequest(`Payment amount must equal the challan fine amount (${challan.fineAmount})`);

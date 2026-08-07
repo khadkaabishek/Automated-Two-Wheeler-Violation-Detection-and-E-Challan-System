@@ -31,7 +31,7 @@ export const uphold = asyncHandler(async (req, res) => {
     req.user.id,
     req
   );
-  new ApiResponse(res, 200, 'Dispute upheld — citation voided', dispute);
+  new ApiResponse(res, 200, 'Dispute upheld — violation voided', dispute);
 });
 
 export const dismiss = asyncHandler(async (req, res) => {
@@ -42,5 +42,5 @@ export const dismiss = asyncHandler(async (req, res) => {
     req.user.id,
     req
   );
-  new ApiResponse(res, 200, 'Dispute dismissed — citation stands', dispute);
+  new ApiResponse(res, 200, 'Dispute dismissed — violation stands', dispute);
 });

@@ -57,6 +57,12 @@ enum ChallanDisputeStatus {
   DISMISSED
 }
 
+enum FlaggedDetectionStatus {
+  PENDING_REVIEW
+  CONVERTED
+  DISMISSED
+}
+
 enum PaymentMethod {
   CASH
   ESEWA
@@ -174,6 +180,7 @@ model User {
   challansAsOfficer Challan[]  @relation("ChallanOfficer")
   officerApplications OfficerApplication[]
   disputesRaised      ChallanDispute[]
+  flaggedDetections   FlaggedDetection[]
 
   @@index([roleId])
   @@index([status])
@@ -321,6 +328,7 @@ model Challan {
   evidences         Evidence[]
   payments          Payment[]
   disputes          ChallanDispute[]
+  flaggedDetection  FlaggedDetection?
 
   @@index([vehicleId])
   @@index([officerId])
@@ -328,6 +336,40 @@ model Challan {
   @@index([paymentStatus])
   @@index([challanNumber])
   @@map("challans")
+}
+
+// ==========================================================
+// FLAGGED DETECTION (remote-model violation screening queue)
+// ==========================================================
+// A photo an officer submitted to the screening pipeline (ml-service)
+// that came back as a two-wheeler with a confident violation. Sits in a
+// review queue until a Traffic Police / Super Admin officer either
+// converts it into an actual Challan or dismisses it as a false positive.
+// The model never creates a Challan itself — a human always does that.
+
+model FlaggedDetection {
+  id                String                  @id @default(uuid())
+  submittedById     String                  @map("submitted_by_id")
+  vehicleType       String                  @map("vehicle_type")
+  violationLabel    String                  @map("violation_label")
+  confidence        Decimal                 @map("confidence") @db.Decimal(5, 4)
+  evidenceImagePath String                  @map("evidence_image_path")
+  platePreviewPaths String[]                @map("plate_preview_paths")
+  sourceType        String                  @default("photo") @map("source_type") // "photo" | "video"
+  frameTimestampSec Decimal?                @map("frame_timestamp_sec") @db.Decimal(8, 2) // set when sourceType = "video"
+  status            FlaggedDetectionStatus  @default(PENDING_REVIEW)
+  challanId         String?                 @unique @map("challan_id")
+  reviewedBy        String?                 @map("reviewed_by")
+  reviewedAt        DateTime?               @map("reviewed_at")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+
+  submittedBy User     @relation(fields: [submittedById], references: [id])
+  challan     Challan? @relation(fields: [challanId], references: [id])
+
+  @@index([submittedById])
+  @@index([status])
+  @@map("flagged_detections")
 }
 
 // ==========================================================

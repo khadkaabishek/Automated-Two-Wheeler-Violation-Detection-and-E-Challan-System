@@ -19,7 +19,7 @@ router.use(authenticate);
  * /disputes:
  *   post:
  *     tags: [Disputes]
- *     summary: Dispute a citation issued against your own vehicle ("I didn't do it")
+ *     summary: Dispute a violation issued against your own vehicle ("I didn't do it")
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       201: { description: Dispute submitted }
@@ -50,7 +50,7 @@ router.get('/:id', disputeIdParamValidator, validate, disputeController.getDispu
  * /disputes/{id}/uphold:
  *   patch:
  *     tags: [Disputes]
- *     summary: Uphold a dispute - voids the citation and notifies the owner
+ *     summary: Uphold a dispute - voids the violation and notifies the owner
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       200: { description: Dispute upheld }
@@ -68,7 +68,7 @@ router.patch(
  * /disputes/{id}/dismiss:
  *   patch:
  *     tags: [Disputes]
- *     summary: Dismiss a dispute - the citation stands, owner is notified
+ *     summary: Dismiss a dispute - the violation stands, owner is notified
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       200: { description: Dispute dismissed }

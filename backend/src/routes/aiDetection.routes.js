@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import * as aiDetectionController from '../controllers/aiDetection.controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
+import { authorizePermissions } from '../middlewares/authorize.js';
+import { analyzeUpload } from '../middlewares/upload.js';
+import { PERMISSIONS } from '../constants/permissions.js';
 
 import { authorizePermissions } from '../middlewares/authorize.js';
 import { upload } from '../middlewares/upload.js';
@@ -13,7 +16,7 @@ const router = Router();
  * /ai-detection/status:
  *   get:
  *     tags: [AI Detection]
- *     summary: Status of the planned automatic violation-detection integration
+ *     summary: Live status of the remote helmet/plate detection service
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       200: { description: Status retrieved }

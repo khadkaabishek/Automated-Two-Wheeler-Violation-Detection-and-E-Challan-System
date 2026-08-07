@@ -13,12 +13,13 @@ export const createChallanValidator = [
     .trim()
     .matches(/^([01]\d|2[0-3]):([0-5]\d)$/)
     .withMessage('incidentTime must be in HH:mm 24-hour format'),
+  body('flaggedDetectionId').optional({ checkFalsy: true }).isUUID(),
 ];
 
 export const updateChallanValidator = [
-  param('id').isUUID().withMessage('Invalid challan ID'),
+  param('id').isUUID().withMessage('Invalid violation ID'),
   body('description').optional({ checkFalsy: true }).trim().isLength({ max: 1000 }),
   body('address').optional({ checkFalsy: true }).trim().isLength({ max: 500 }),
 ];
 
-export const challanIdParamValidator = [param('id').isUUID().withMessage('Invalid challan ID')];
+export const challanIdParamValidator = [param('id').isUUID().withMessage('Invalid violation ID')];

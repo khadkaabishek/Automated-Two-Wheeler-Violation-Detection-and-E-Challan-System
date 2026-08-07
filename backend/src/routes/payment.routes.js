@@ -81,7 +81,7 @@ router.post(
  * /payments/{id}/approve:
  *   patch:
  *     tags: [Payments]
- *     summary: Approve a pending payment request - marks the citation paid and notifies the owner
+ *     summary: Approve a pending payment request - marks the violation paid and notifies the owner
  *     security: [{ bearerAuth: [] }]
  *     responses:
  *       200: { description: Payment approved }

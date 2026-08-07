@@ -79,18 +79,18 @@ export const sendNewLoginEmail = async (to, { time, ipAddress }) => {
 export const sendChallanIssuedEmail = async (to, { challanNumber, vehicleNumber, fineAmount, violations }) => {
   return sendEmail({
     to,
-    subject: `New citation issued - ${challanNumber}`,
-    html: `<p>A new citation has been issued against your vehicle <strong>${vehicleNumber}</strong>.</p><p>Citation number: ${challanNumber}<br/>Violations: ${violations}<br/>Fine amount: Rs ${fineAmount}</p><p>Sign in to the citizen portal to view details once it's approved.</p>`,
-    text: `New citation ${challanNumber} issued against vehicle ${vehicleNumber}. Violations: ${violations}. Fine amount: Rs ${fineAmount}.`,
+    subject: `New violation notice issued - ${challanNumber}`,
+    html: `<p>A new violation notice has been issued against your vehicle <strong>${vehicleNumber}</strong>.</p><p>Notice number: ${challanNumber}<br/>Violation type(s): ${violations}<br/>Fine amount: Rs ${fineAmount}</p><p>Sign in to the portal to view details once it's approved.</p>`,
+    text: `New violation notice ${challanNumber} issued against vehicle ${vehicleNumber}. Violation type(s): ${violations}. Fine amount: Rs ${fineAmount}.`,
   });
 };
 
 export const sendChallanApprovedEmail = async (to, { challanNumber, vehicleNumber, fineAmount }) => {
   return sendEmail({
     to,
-    subject: `Citation approved - ${challanNumber}`,
-    html: `<p>Your citation <strong>${challanNumber}</strong> against vehicle ${vehicleNumber} has been approved.</p><p>Fine amount due: Rs ${fineAmount}</p><p>You can now submit a payment request from the citizen portal.</p>`,
-    text: `Citation ${challanNumber} against vehicle ${vehicleNumber} approved. Fine amount due: Rs ${fineAmount}. You can now submit a payment request.`,
+    subject: `Violation notice approved - ${challanNumber}`,
+    html: `<p>Your violation notice <strong>${challanNumber}</strong> against vehicle ${vehicleNumber} has been approved.</p><p>Fine amount due: Rs ${fineAmount}</p><p>You can now submit a payment request from the portal.</p>`,
+    text: `Violation notice ${challanNumber} against vehicle ${vehicleNumber} approved. Fine amount due: Rs ${fineAmount}. You can now submit a payment request.`,
   });
 };
 
@@ -98,8 +98,8 @@ export const sendPaymentApprovedEmail = async (to, { challanNumber, amount }) =>
   return sendEmail({
     to,
     subject: `Payment confirmed - ${challanNumber}`,
-    html: `<p>Your payment of <strong>Rs ${amount}</strong> for citation ${challanNumber} has been confirmed and the citation is now marked paid.</p>`,
-    text: `Payment of Rs ${amount} for citation ${challanNumber} confirmed. Citation marked paid.`,
+    html: `<p>Your payment of <strong>Rs ${amount}</strong> for violation notice ${challanNumber} has been confirmed and it is now marked paid.</p>`,
+    text: `Payment of Rs ${amount} for violation notice ${challanNumber} confirmed. Marked paid.`,
   });
 };
 
@@ -107,8 +107,8 @@ export const sendPaymentRejectedEmail = async (to, { challanNumber, amount, reas
   return sendEmail({
     to,
     subject: `Payment not accepted - ${challanNumber}`,
-    html: `<p>Your payment request of Rs ${amount} for citation ${challanNumber} was not accepted.</p><p>Reason: ${reason || 'Not specified'}</p><p>Please submit a new payment request from the citizen portal.</p>`,
-    text: `Payment request of Rs ${amount} for citation ${challanNumber} was not accepted. Reason: ${reason || 'Not specified'}.`,
+    html: `<p>Your payment request of Rs ${amount} for violation notice ${challanNumber} was not accepted.</p><p>Reason: ${reason || 'Not specified'}</p><p>Please submit a new payment request from the portal.</p>`,
+    text: `Payment request of Rs ${amount} for violation notice ${challanNumber} was not accepted. Reason: ${reason || 'Not specified'}.`,
   });
 };
 
@@ -118,9 +118,9 @@ export const sendDisputeResolvedEmail = async (to, { challanNumber, decision, re
     to,
     subject: `Dispute ${upheld ? 'upheld' : 'dismissed'} - ${challanNumber}`,
     html: upheld
-      ? `<p>Your dispute for citation <strong>${challanNumber}</strong> was upheld — the citation has been voided.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`
-      : `<p>Your dispute for citation <strong>${challanNumber}</strong> was reviewed and dismissed — the citation stands.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`,
-    text: `Dispute for citation ${challanNumber} was ${upheld ? 'upheld — citation voided' : 'dismissed — citation stands'}. Reviewer note: ${resolutionNote || 'None provided'}.`,
+      ? `<p>Your dispute for violation notice <strong>${challanNumber}</strong> was upheld — it has been voided.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`
+      : `<p>Your dispute for violation notice <strong>${challanNumber}</strong> was reviewed and dismissed — it stands.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`,
+    text: `Dispute for violation notice ${challanNumber} was ${upheld ? 'upheld — voided' : 'dismissed — stands'}. Reviewer note: ${resolutionNote || 'None provided'}.`,
   });
 };
 

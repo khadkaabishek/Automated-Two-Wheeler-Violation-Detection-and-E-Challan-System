@@ -6,6 +6,7 @@ import { generateChallanNumber } from '../utils/generateChallanNumber.js';
 import { getPagination, buildPaginationMeta, getSorting } from '../utils/pagination.js';
 import { recordAudit } from './audit.service.js';
 import { notifyChallanIssued, notifyChallanApproved } from './notification.service.js';
+import { markConverted as markFlaggedDetectionConverted } from './flaggedDetection.service.js';
 import { ROLES } from '../constants/roles.js';
 
 // Valid forward transitions for the challan lifecycle.
@@ -74,6 +75,10 @@ export const createChallan = async (payload, officerId, req) => {
     req,
   });
 
+  if (payload.flaggedDetectionId) {
+    await markFlaggedDetectionConverted(payload.flaggedDetectionId, challan.id, officerId);
+  }
+
   await notifyChallanIssued(challan);
 
   return challan;
@@ -116,10 +121,10 @@ export const listChallans = async (query, actor) => {
 
 export const getChallanById = async (id, actor) => {
   const challan = await challanRepository.findById(id);
-  if (!challan) throw ApiError.notFound('Challan not found');
+  if (!challan) throw ApiError.notFound('Violation not found');
 
   if (actor?.roleName === ROLES.VEHICLE_OWNER && challan.vehicle?.owner?.userId !== actor.id) {
-    throw ApiError.notFound('Challan not found');
+    throw ApiError.notFound('Violation not found');
   }
   return challan;
 };
@@ -127,7 +132,7 @@ export const getChallanById = async (id, actor) => {
 export const updateChallan = async (id, payload, actorId, req) => {
   const challan = await getChallanById(id);
   if (challan.status !== 'PENDING') {
-    throw ApiError.badRequest('Only challans in PENDING status can be edited');
+    throw ApiError.badRequest('Only violations in PENDING status can be edited');
   }
   const updated = await challanRepository.update(id, {
     description: payload.description,

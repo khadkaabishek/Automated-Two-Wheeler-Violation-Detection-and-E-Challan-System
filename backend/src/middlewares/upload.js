@@ -56,4 +56,37 @@ export const evidenceUpload = upload.fields([
   { name: 'evidenceVideo', maxCount: 5 },
 ]);
 
+// Used only for AI-detection analysis: the image is forwarded to the ML
+// service and never written to disk, so this uses memory storage instead
+// of the disk-backed `upload` above.
+const analyzeFileFilter = (req, file, cb) => {
+  const IMAGE_TYPES_LOCAL = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+  if (!IMAGE_TYPES_LOCAL.includes(file.mimetype)) {
+    return cb(ApiError.badRequest('Only jpeg, jpg, png, or webp images are allowed'));
+  }
+  cb(null, true);
+};
+
+export const analyzeUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: analyzeFileFilter,
+  limits: { fileSize: env.upload.maxFileSizeMb * 1024 * 1024 },
+}).single('image');
+
+// Video screening: same memory-storage approach as analyzeUpload (forwarded
+// to the ML service, never written to disk here), but accepts video and
+// uses the larger video size limit.
+const videoAnalyzeFileFilter = (req, file, cb) => {
+  if (!VIDEO_TYPES.includes(file.mimetype)) {
+    return cb(ApiError.badRequest('Only mp4, mpeg, mov, or webm videos are allowed'));
+  }
+  cb(null, true);
+};
+
+export const videoAnalyzeUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: videoAnalyzeFileFilter,
+  limits: { fileSize: env.upload.maxVideoSizeMb * 1024 * 1024 },
+}).single('video');
+
 export default upload;

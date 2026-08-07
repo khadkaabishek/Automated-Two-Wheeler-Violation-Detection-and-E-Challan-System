@@ -35,7 +35,7 @@ export const confirmPayment = asyncHandler(async (req, res) => {
 
 export const approvePayment = asyncHandler(async (req, res) => {
   const payment = await paymentService.approvePayment(req.params.id, req.user.id, req);
-  new ApiResponse(res, 200, 'Payment approved — citation marked paid', payment);
+  new ApiResponse(res, 200, 'Payment approved — violation marked paid', payment);
 });
 
 export const rejectPayment = asyncHandler(async (req, res) => {

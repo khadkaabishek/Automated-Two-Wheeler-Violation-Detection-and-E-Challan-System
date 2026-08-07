@@ -82,7 +82,7 @@ async function main() {
   }
 
   console.log('Seeding default Super Admin user...');
-  const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || 'superadmin@echallan.gov.np';
+  const superAdminEmail = process.env.SEED_SUPER_ADMIN_EMAIL || 'superadmin@smarttraffic.gov.np';
   const superAdminPassword = process.env.SEED_SUPER_ADMIN_PASSWORD || 'SuperAdmin@123';
   const hashedPassword = await bcrypt.hash(superAdminPassword, SALT_ROUNDS);
 

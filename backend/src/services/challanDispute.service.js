@@ -10,19 +10,19 @@ const DISPUTABLE_STATUSES = ['PENDING', 'APPROVED'];
 
 export const createDispute = async (userId, payload, req) => {
   const challan = await challanRepository.findById(payload.challanId);
-  if (!challan) throw ApiError.notFound('Citation not found');
+  if (!challan) throw ApiError.notFound('Violation not found');
 
   if (challan.vehicle?.owner?.userId !== userId) {
-    throw ApiError.forbidden('You can only dispute citations issued against your own vehicles');
+    throw ApiError.forbidden('You can only dispute violations issued against your own vehicles');
   }
 
   if (!DISPUTABLE_STATUSES.includes(challan.status)) {
-    throw ApiError.badRequest(`Citations in ${challan.status} status can no longer be disputed`);
+    throw ApiError.badRequest(`Violations in ${challan.status} status can no longer be disputed`);
   }
 
   const existingPending = await challanDisputeRepository.findPendingByChallan(payload.challanId);
   if (existingPending) {
-    throw ApiError.conflict('You already have a pending dispute for this citation');
+    throw ApiError.conflict('You already have a pending dispute for this violation');
   }
 
   const dispute = await challanDisputeRepository.create({
@@ -71,8 +71,8 @@ export const getDisputeById = async (id, actor) => {
 
 /**
  * Traffic Police / Super Admin resolves a pending dispute.
- * - UPHELD: the citizen was right — the citation is voided (CANCELLED).
- * - DISMISSED: the citation stands as issued.
+ * - UPHELD: the citizen was right — the violation is voided (CANCELLED).
+ * - DISMISSED: the violation stands as issued.
  */
 export const resolveDispute = async (id, decision, resolutionNote, actorId, req) => {
   const dispute = await challanDisputeRepository.findById(id);
@@ -83,7 +83,7 @@ export const resolveDispute = async (id, decision, resolutionNote, actorId, req)
 
   if (decision === 'UPHELD') {
     // Bypasses the normal linear workflow deliberately — a successful dispute
-    // can void a citation regardless of whether it was still PENDING or had
+    // can void a violation regardless of whether it was still PENDING or had
     // already been APPROVED.
     await challanRepository.update(dispute.challanId, { status: 'CANCELLED' });
   }

@@ -1,7 +1,7 @@
 import { body, param } from 'express-validator';
 
 export const createPaymentValidator = [
-  body('challanId').isUUID().withMessage('A valid challan ID is required'),
+  body('challanId').isUUID().withMessage('A valid violation ID is required'),
   body('amount').isFloat({ min: 0.01 }).withMessage('Amount must be a positive number'),
   body('paymentMethod')
     .isIn(['CASH', 'ESEWA', 'KHALTI', 'STRIPE', 'BANK_TRANSFER'])
