@@ -1,9 +1,0 @@
-# dataset.yaml
-path: '/Users/abishekkhadka/Desktop/Bachelor-s-Note/6th Sem/Automated-Two-Wheeler-Violation-Detection-and-E-Challan-System/ML/Datasets/Helmet_kaggle' # Root dataset directory
-train: 'train/images'   # Train images (relative to path)
-val: 'val/images'     # Validation images (relative to path)
-
-
-names:
-  0: helmet
-  1: no_helmet
