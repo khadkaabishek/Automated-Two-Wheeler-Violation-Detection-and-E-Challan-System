@@ -31,3 +31,5 @@ export default function Pagination({ meta, onPageChange }) {
     </div>
   );
 }
+
+export default function Pagination({ page, totalPages, limit = 10, onPageChange, onLimitChange }) {
