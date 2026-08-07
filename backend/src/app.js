@@ -19,11 +19,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // ---- Security & core middleware ----
-// Default Cross-Origin-Resource-Policy is same-origin, which blocks the
-// frontend (a different origin/port) from loading images served from
-// /uploads below — evidence photos, plate previews, avatars, etc. This app
-// is intentionally a separate SPA + API pair, so that's relaxed here.
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 // app.use(
 //   cors({
 //     origin: env.cors.origin,

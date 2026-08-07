@@ -108,3 +108,8 @@ export const api = {
 };
 
 export { BASE_URL };
+
+// Uploaded files (evidence photos, plate previews, avatars, etc.) are served
+// statically from the API origin, not under /api/v1 — this strips that
+// suffix so callers can build `${FILE_ORIGIN}${relativePath}` image URLs.
+export const FILE_ORIGIN = BASE_URL.replace(/\/api\/v\d+\/?$/, '');

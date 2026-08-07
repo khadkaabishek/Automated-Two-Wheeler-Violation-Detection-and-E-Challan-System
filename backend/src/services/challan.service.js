@@ -65,6 +65,7 @@ export const createChallan = async (payload, officerId, req) => {
       violationId: v.id,
       fineAmount: v.fineAmount,
     })),
+    aiSnapshotUrl: payload.aiSnapshotUrl,
   });
 
   await recordAudit({

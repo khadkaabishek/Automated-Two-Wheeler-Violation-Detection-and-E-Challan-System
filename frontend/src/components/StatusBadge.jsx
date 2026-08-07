@@ -17,6 +17,12 @@ const STATUS_COLOR = {
   SUCCESS: 'green',
   FAILED: 'red',
   REFUNDED: 'blue',
+  // Dispute status
+  UPHELD: 'red',
+  DISMISSED: 'grey',
+  // Flagged detection status
+  PENDING_REVIEW: 'amber',
+  CONVERTED: 'green',
 };
 
 export default function StatusBadge({ status }) {

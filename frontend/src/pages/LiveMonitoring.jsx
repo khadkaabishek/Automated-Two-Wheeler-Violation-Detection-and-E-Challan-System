@@ -1,422 +1,244 @@
-import { useEffect } from "react";
-import {
-  AlertCircle,
-  BarChart3,
-  Bell,
-  Cctv,
-  ChevronDown,
-  FileText,
-  Flag,
-  LayoutDashboard,
-  ScanLine,
-  Search,
-  Settings,
-  ShieldCheck,
-  TriangleAlert,
-  User,
-  Video,
-} from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { aiDetectionApi } from '../api/aiDetection';
+import { BASE_URL, tokenStore } from '../api/client';
+import { useToast } from '../context/ToastContext';
+import Field from '../components/Field';
+import Loader from '../components/Loader';
+
+const MOCK_CCTVS = [
+  { id: 'CCTV-KTM-001', location: 'Tinkune Intersection' },
+  { id: 'CCTV-BKT-002', location: 'Suryabinayak Chowk' },
+  { id: 'CCTV-LTP-003', location: 'Satdobato Ring Road' },
+];
 
 export default function LiveMonitoring() {
+  const toast = useToast();
+  const navigate = useNavigate();
+  
+  const [selectedCCTV, setSelectedCCTV] = useState('');
+  const [videoFile, setVideoFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  // ML Processing State
+  const [jobId, setJobId] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [violationDetected, setViolationDetected] = useState(false);
+  const logsEndRef = useRef(null);
+
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
+
+  useEffect(() => {
+    if (!jobId) return;
+
+    const token = tokenStore.getAccess();
+    const source = new EventSource(`${BASE_URL}/ai-detection/stream/${jobId}?token=${token}`);
+
+    source.addEventListener('log', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        setLogs(prev => [...prev, data.message]);
+      } catch (err) {}
+    });
+
+    source.addEventListener('violation', (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        setLogs(prev => [...prev, `[ALERT] ${data.message}`]);
+        setViolationDetected(true);
+      } catch (err) {}
+    });
+
+    source.addEventListener('close', () => {
+      source.close();
+    });
+
+    return () => {
+      source.close();
+    };
+  }, [jobId]);
+
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!videoFile) {
+      toast.error('Please select a video file first');
+      return;
+    }
+
+    setUploading(true);
+    setLogs([]);
+    setViolationDetected(false);
+    setJobId(null);
+    
+    try {
+      const formData = new FormData();
+      formData.append('evidenceVideo', videoFile);
+
+      const res = await aiDetectionApi.uploadVideo(formData);
+      toast.success(res.message || 'Video uploaded and queued for processing');
+      setJobId(res.jobId);
+      setVideoFile(null);
+    } catch (err) {
+      toast.error(err.message || 'Failed to upload video');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
-<div className="flex p-8 flex-col flex-1 gap-6">
-<div className="flex justify-between items-center">
-              <h1 className="font-semibold text-foreground text-xl">
-                Live Monitoring
-              </h1>
-              <div className="flex items-center gap-4">
-                <button className="rounded-[10px] bg-card text-foreground text-sm leading-5 border-border border-1 border-solid flex px-4 py-2 items-center gap-2">
-                  <Cctv className="size-4 text-[#9f9fa9]" />
-                  <span>CAM-07 · NH-48 Checkpoint</span>
-                  <ChevronDown className="size-4 text-[#9f9fa9]" />
-                </button>
-                <div className="rounded-full bg-card border-border border-1 border-solid flex px-3 py-1.5 items-center gap-2">
-                  <span className="relative size-2 flex">
-                    <span className="inline-flex size-full animate-ping opacity-60 rounded-full bg-[#00bc7d] absolute" />
-                    <span className="relative inline-flex size-2 rounded-full bg-[#00bc7d]" />
-                  </span>
-                  <span className="text-[#9f9fa9] text-xs leading-4">
-                    HD · 30fps · Latency 42ms
-                  </span>
-                </div>
-              </div>
+    <div>
+      <div className="page-header">
+        <div>
+          <div className="page-title">Live Monitoring</div>
+          <div className="page-sub">Monitor live CCTV feeds and test ML detection</div>
+        </div>
+      </div>
+
+      <div className="grid" style={{ gridTemplateColumns: '1fr 450px', gap: '2rem' }}>
+        {/* Left Column: Feed and Upload */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {/* Live Feed Viewer */}
+          <div className="card">
+            <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Camera Feed</h2>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <Field label="Select CCTV">
+                <select
+                  className="input"
+                  value={selectedCCTV}
+                  onChange={(e) => setSelectedCCTV(e.target.value)}
+                >
+                  <option value="">-- Choose a camera --</option>
+                  {MOCK_CCTVS.map(cctv => (
+                    <option key={cctv.id} value={cctv.id}>
+                      {cctv.id} ({cctv.location})
+                    </option>
+                  ))}
+                </select>
+              </Field>
             </div>
-            <div className="flex flex-1 gap-6">
-              <div className="flex flex-col flex-1 gap-4">
-                <div className="relative rounded-[14px] bg-[#0A0D12] border-border border-1 border-solid w-full h-120 overflow-hidden">
-                  <img
-                    src="https://images.unsplash.com/photo-1673680059436-0d474d6ebf81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxncmF5c2NhbGUlMjB0cmFmZmljJTIwcm9hZCUyMG1vdG9yY3ljbGUlMjByaWRlcnMlMjBjY3R2JTIwdmlld3xlbnwxfDB8fHwxNzgyODA0ODUwfDA&ixlib=rb-4.1.0&q=80&w=400"
-                    alt="Live traffic camera feed"
-                    className="size-full object-cover grayscale"
-                    data-photoid="7xYnori08bE"
-                    data-authorname="Đăng Nguyên"
-                    data-authorurl="https://unsplash.com/@dangnguyen43"
-                    data-blurhash="LCE{kNWB00ay~qIUIUM{?bt7RjWB"
-                  />
-                  <div className="bg-[#0A0D12]/20 absolute inset-0" />
-                  <div className="left-[34%] top-[30%] h-[48%] w-[30%] rounded-sm border-primary border-2 border-solid absolute">
-                    <span className="font-medium rounded-sm bg-primary text-white text-[11px] absolute left-0 -top-6 px-2 py-0.5">
-                      Motorcycle
-                    </span>
-                  </div>
-                  <div className="left-[38%] top-[34%] h-[34%] w-[20%] rounded-sm border-[#3E8595] border-2 border-solid absolute">
-                    <span className="font-medium rounded-sm bg-[#3E8595] text-white text-[11px] absolute left-0 -top-6 px-2 py-0.5">
-                      Rider
-                    </span>
-                  </div>
-                  <div className="left-[41%] top-[31%] h-[10%] w-[12%] rounded-sm border-[#7A2A2A] border-2 border-solid absolute">
-                    <span className="font-medium rounded-sm bg-[#7A2A2A] text-white text-[11px] flex absolute left-0 -top-6 px-2 py-0.5 items-center gap-1">
-                      <TriangleAlert className="size-3" />
-                      No Helmet
-                    </span>
-                  </div>
-                  <div className="left-[37%] top-[68%] h-[8%] w-[18%] rounded-sm border-[#7A5A1E] border-2 border-solid absolute">
-                    <span className="font-medium rounded-sm bg-[#7A5A1E] text-white text-[11px] absolute left-0 -bottom-6 px-2 py-0.5">
-                      Number Plate · MH12AB3456
-                    </span>
-                  </div>
-                  <div className="rounded-full bg-[#0A0D12]/80 flex absolute left-4 bottom-4 px-3 py-1.5 items-center gap-2">
-                    <ScanLine className="size-3.5 text-[#ff6467]" />
-                    <span className="text-foreground text-[13px]">
-                      Violation Detected · 96.2% confidence
-                    </span>
-                  </div>
-                  <div className="rounded-full bg-[#0A0D12]/80 flex absolute right-4 top-4 px-3 py-1 items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-[#ff6467]" />
-                    <span className="font-medium text-foreground text-[11px]">
-                      REC
-                    </span>
-                  </div>
+
+            <div 
+              style={{ 
+                aspectRatio: '16/9', 
+                backgroundColor: '#000', 
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#666',
+                border: '1px solid var(--border-color)',
+                position: 'relative'
+              }}
+            >
+              {selectedCCTV ? (
+                <div style={{ textAlign: 'center' }}>
+                  <span className="spinner" style={{ display: 'block', margin: '0 auto 1rem', width: '30px', height: '30px' }} />
+                  <p>Connecting to {selectedCCTV}...</p>
+                  <p style={{ fontSize: '0.85rem', color: '#555', marginTop: '0.5rem' }}>(Live feed placeholder)</p>
                 </div>
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="relative rounded-[10px] bg-card border-border border-1 border-solid h-25 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1494488180300-4c634d1b2124?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc3RyZWV0JTIwdHJhZmZpYyUyMGNhbWVyYSUyMHN1cnZlaWxsYW5jZSUyMHNjZW5lfGVufDF8MHx8fDE3ODI4MDQ4NTB8MA&ixlib=rb-4.1.0&q=80&w=400"
-                      alt="CAM-01"
-                      className="size-full object-cover grayscale"
-                      data-photoid="alGtgU3MQu4"
-                      data-authorname="Julien Riedel"
-                      data-authorurl="https://unsplash.com/@djulien"
-                      data-blurhash="LA8Dw.a~0eRj={j[9tR*xuayWAWC"
-                    />
-                    <div className="bg-[#0A0D12]/30 absolute inset-0" />
-                    <div className="flex absolute left-2 bottom-1.5 items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-[#00bc7d]" />
-                      <span className="font-medium text-foreground text-[11px]">
-                        CAM-01
-                      </span>
-                    </div>
-                  </div>
-                  <div className="relative rounded-[10px] bg-card border-border border-1 border-solid h-25 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1507211222203-4d522e372607?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxuaWdodCUyMHN0cmVldCUyMHRyYWZmaWMlMjBtb3RvcmN5Y2xlJTIwcmlkZXJzJTIwZGFya3xlbnwxfDB8fHwxNzgyODA0ODU1fDA&ixlib=rb-4.1.0&q=80&w=400"
-                      alt="CAM-02"
-                      className="size-full object-cover grayscale"
-                      data-photoid="IrGyuTSrkK4"
-                      data-authorname="Yiran Ding"
-                      data-authorurl="https://unsplash.com/@yiranding"
-                      data-blurhash="L76I4]oz4TWBPBbbrXjZ01ae-:kW"
-                    />
-                    <div className="bg-[#0A0D12]/30 absolute inset-0" />
-                    <div className="flex absolute left-2 bottom-1.5 items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-[#00bc7d]" />
-                      <span className="font-medium text-foreground text-[11px]">
-                        CAM-02
-                      </span>
-                    </div>
-                  </div>
-                  <div className="relative rounded-[10px] bg-card border-border border-1 border-solid h-25 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1777647647320-75c1fda15080?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHx0cmFmZmljJTIwaW50ZXJzZWN0aW9uJTIwY2FycyUyMHN0cmVldCUyMHZpZXd8ZW58MXwwfHx8MTc4MjgwNDg1OXww&ixlib=rb-4.1.0&q=80&w=400"
-                      alt="CAM-03"
-                      className="size-full object-cover grayscale"
-                      data-photoid="UaVnS_G8Gaw"
-                      data-authorname="Chutikarn Dejpeum"
-                      data-authorurl="https://unsplash.com/@pongz"
-                      data-blurhash="L*J+DaM|M{j[.TWCj[ayRPj@j]kC"
-                    />
-                    <div className="bg-[#0A0D12]/30 absolute inset-0" />
-                    <div className="flex absolute left-2 bottom-1.5 items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-[#ff6467]" />
-                      <span className="font-medium text-foreground text-[11px]">
-                        CAM-03
-                      </span>
-                    </div>
-                  </div>
-                  <div className="relative rounded-[10px] bg-card border-border border-1 border-solid h-25 overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1673680059436-0d474d6ebf81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxncmF5c2NhbGUlMjB0cmFmZmljJTIwcm9hZCUyMG1vdG9yY3ljbGUlMjByaWRlcnMlMjBjY3R2JTIwdmlld3xlbnwxfDB8fHwxNzgyODA0ODUwfDA&ixlib=rb-4.1.0&q=80&w=400"
-                      alt="CAM-04"
-                      className="size-full object-cover grayscale"
-                      data-photoid="7xYnori08bE"
-                      data-authorname="Đăng Nguyên"
-                      data-authorurl="https://unsplash.com/@dangnguyen43"
-                      data-blurhash="LCE{kNWB00ay~qIUIUM{?bt7RjWB"
-                    />
-                    <div className="bg-[#0A0D12]/30 absolute inset-0" />
-                    <div className="flex absolute left-2 bottom-1.5 items-center gap-1.5">
-                      <span className="size-2 rounded-full bg-[#00bc7d]" />
-                      <span className="font-medium text-foreground text-[11px]">
-                        CAM-04
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="shrink-0 rounded-[14px] bg-card border-border border-t-0 border-r-0 border-b-0 border-l-1 border-solid flex p-5 flex-col gap-4 w-70">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-semibold text-muted-foreground text-sm">
-                    Event Stream
-                  </h2>
-                  <span className="rounded-full bg-zinc-800 text-[#9f9fa9] text-[10px] flex px-2 py-0.5 items-center gap-1">
-                    <span className="size-1.5 rounded-full bg-[#00bc7d]" />
-                    Live
-                  </span>
-                </div>
-                <div className="max-h-[640px] overflow-y-auto flex pr-1 flex-col gap-2">
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1673680059436-0d474d6ebf81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxncmF5c2NhbGUlMjB0cmFmZmljJTIwcm9hZCUyMG1vdG9yY3ljbGUlMjByaWRlcnMlMjBjY3R2JTIwdmlld3xlbnwxfDB8fHwxNzgyODA0ODUwfDA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="7xYnori08bE"
-                          data-authorname="Đăng Nguyên"
-                          data-authorurl="https://unsplash.com/@dangnguyen43"
-                          data-blurhash="LCE{kNWB00ay~qIUIUM{?bt7RjWB"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:32:08
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          No Helmet
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH12AB3456
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1507211222203-4d522e372607?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxuaWdodCUyMHN0cmVldCUyMHRyYWZmaWMlMjBtb3RvcmN5Y2xlJTIwcmlkZXJzJTIwZGFya3xlbnwxfDB8fHwxNzgyODA0ODU1fDA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="IrGyuTSrkK4"
-                          data-authorname="Yiran Ding"
-                          data-authorurl="https://unsplash.com/@yiranding"
-                          data-blurhash="L76I4]oz4TWBPBbbrXjZ01ae-:kW"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:31:47
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          Triple Riding
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH14CD7890
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1494488180300-4c634d1b2124?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc3RyZWV0JTIwdHJhZmZpYyUyMGNhbWVyYSUyMHN1cnZlaWxsYW5jZSUyMHNjZW5lfGVufDF8MHx8fDE3ODI4MDQ4NTB8MA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="alGtgU3MQu4"
-                          data-authorname="Julien Riedel"
-                          data-authorurl="https://unsplash.com/@djulien"
-                          data-blurhash="LA8Dw.a~0eRj={j[9tR*xuayWAWC"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:30:55
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          No Helmet
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH01EF2345
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1777647647320-75c1fda15080?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHx0cmFmZmljJTIwaW50ZXJzZWN0aW9uJTIwY2FycyUyMHN0cmVldCUyMHZpZXd8ZW58MXwwfHx8MTc4MjgwNDg1OXww&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="UaVnS_G8Gaw"
-                          data-authorname="Chutikarn Dejpeum"
-                          data-authorurl="https://unsplash.com/@pongz"
-                          data-blurhash="L*J+DaM|M{j[.TWCj[ayRPj@j]kC"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:29:33
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          Wrong Lane
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH02GH6789
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1673680059436-0d474d6ebf81?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxncmF5c2NhbGUlMjB0cmFmZmljJTIwcm9hZCUyMG1vdG9yY3ljbGUlMjByaWRlcnMlMjBjY3R2JTIwdmlld3xlbnwxfDB8fHwxNzgyODA0ODUwfDA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="7xYnori08bE"
-                          data-authorname="Đăng Nguyên"
-                          data-authorurl="https://unsplash.com/@dangnguyen43"
-                          data-blurhash="LCE{kNWB00ay~qIUIUM{?bt7RjWB"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:28:12
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          No Helmet
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH04JK1122
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1507211222203-4d522e372607?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxuaWdodCUyMHN0cmVldCUyMHRyYWZmaWMlMjBtb3RvcmN5Y2xlJTIwcmlkZXJzJTIwZGFya3xlbnwxfDB8fHwxNzgyODA0ODU1fDA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="IrGyuTSrkK4"
-                          data-authorname="Yiran Ding"
-                          data-authorurl="https://unsplash.com/@yiranding"
-                          data-blurhash="L76I4]oz4TWBPBbbrXjZ01ae-:kW"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:27:40
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          No Helmet
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH09LM3344
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1494488180300-4c634d1b2124?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHxjaXR5JTIwc3RyZWV0JTIwdHJhZmZpYyUyMGNhbWVyYSUyMHN1cnZlaWxsYW5jZSUyMHNjZW5lfGVufDF8MHx8fDE3ODI4MDQ4NTB8MA&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="alGtgU3MQu4"
-                          data-authorname="Julien Riedel"
-                          data-authorurl="https://unsplash.com/@djulien"
-                          data-blurhash="LA8Dw.a~0eRj={j[9tR*xuayWAWC"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:26:18
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          Triple Riding
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH12NP5566
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                  <div className="rounded-[10px] bg-[#161B22] flex p-3 flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                      <div className="size-12 shrink-0 rounded-sm bg-[#0A0D12] overflow-hidden">
-                        <img
-                          src="https://images.unsplash.com/photo-1777647647320-75c1fda15080?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3ODc2NDd8MHwxfHNlYXJjaHwxfHx0cmFmZmljJTIwaW50ZXJzZWN0aW9uJTIwY2FycyUyMHN0cmVldCUyMHZpZXd8ZW58MXwwfHx8MTc4MjgwNDg1OXww&ixlib=rb-4.1.0&q=80&w=400"
-                          alt="event"
-                          className="size-full object-cover grayscale"
-                          data-photoid="UaVnS_G8Gaw"
-                          data-authorname="Chutikarn Dejpeum"
-                          data-authorurl="https://unsplash.com/@pongz"
-                          data-blurhash="L*J+DaM|M{j[.TWCj[ayRPj@j]kC"
-                        />
-                      </div>
-                      <div className="flex flex-col flex-1 gap-0.5">
-                        <span className="text-muted-foreground text-[11px]">
-                          14:25:02
-                        </span>
-                        <span className="text-foreground text-[13px]">
-                          No Helmet
-                        </span>
-                        <span className="text-[#5E9AA6] text-xs">
-                          MH20QR7788
-                        </span>
-                      </div>
-                    </div>
-                    <button className="rounded-sm bg-primary/30 text-[#7FB3C0] text-[11px] flex py-1.5 justify-center items-center gap-1.5 w-full">
-                      <Flag className="size-3" />
-                      Flag for Review
-                    </button>
-                  </div>
-                </div>
-              </div>
+              ) : (
+                <p>Select a camera to view feed</p>
+              )}
             </div>
-</div>
-);
+          </div>
+
+          {/* Manual Video Upload for ML Testing */}
+          <div className="card">
+            <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Upload for Testing</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--ink-500)', marginBottom: '1.5rem' }}>
+              Upload a local video file to pass into the ML models for violation processing.
+            </p>
+            
+            <form onSubmit={handleUpload}>
+              <Field label="Video File">
+                <input
+                  type="file"
+                  accept="video/mp4,video/mpeg,video/quicktime,video/webm"
+                  className="input"
+                  onChange={(e) => setVideoFile(e.target.files[0])}
+                  disabled={uploading}
+                />
+              </Field>
+              
+              <button 
+                type="submit" 
+                className="btn btn-primary" 
+                style={{ width: '100%', marginTop: '1rem' }}
+                disabled={!videoFile || uploading}
+              >
+                {uploading ? (
+                  <>
+                    <span className="spinner" /> Uploading...
+                  </>
+                ) : (
+                  'Upload & Process'
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Right Column: ML Processing Terminal */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxHeight: '800px', padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--ink-50)' }}>
+            <h2 style={{ fontSize: '1.1rem', margin: 0 }}>ML Processing Workflow</h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--ink-500)', margin: '4px 0 0 0' }}>Live detection analysis</p>
+          </div>
+          
+          <div style={{ 
+            flex: 1, 
+            backgroundColor: '#1e1e1e', 
+            color: '#00ff00', 
+            fontFamily: 'monospace',
+            padding: '16px',
+            overflowY: 'auto',
+            fontSize: '0.85rem',
+            lineHeight: '1.5'
+          }}>
+            {logs.length === 0 ? (
+              <span style={{ color: '#888' }}>{jobId ? 'Connecting to ML stream...' : 'Waiting for video upload...'}</span>
+            ) : (
+              logs.map((log, index) => {
+                const isAlert = log.includes('[ALERT]');
+                const isError = log.includes('ERROR:');
+                return (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      marginBottom: '8px', 
+                      wordBreak: 'break-all',
+                      color: isAlert ? '#ffeb3b' : isError ? '#ff5252' : '#00ff00',
+                      fontWeight: isAlert ? 'bold' : 'normal'
+                    }}
+                  >
+                    <span style={{ color: '#888', marginRight: '8px' }}>{new Date().toLocaleTimeString()}</span>
+                    {log}
+                  </div>
+                )
+              })
+            )}
+            <div ref={logsEndRef} />
+          </div>
+          
+          {violationDetected && (
+            <div style={{ padding: '16px', backgroundColor: 'var(--civic-gold)', borderTop: '1px solid var(--border-color)', textAlign: 'center' }}>
+              <p style={{ fontWeight: 'bold', margin: '0 0 10px 0', color: '#000' }}>⚠️ Violation Sent to AI Detections Module!</p>
+              <button 
+                className="btn btn-primary btn-sm" 
+                onClick={() => navigate('/ai-detections')}
+                style={{ width: '100%' }}
+              >
+                Review AI Detections
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

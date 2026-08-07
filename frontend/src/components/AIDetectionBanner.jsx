@@ -13,6 +13,8 @@ export default function AIDetectionBanner() {
 
   if (!status) return null;
 
+  const live = status.enabled;
+
   return (
     <div
       className="card"
@@ -29,9 +31,9 @@ export default function AIDetectionBanner() {
           width: 34,
           height: 34,
           borderRadius: 'var(--radius-sm)',
-          background: 'rgba(59, 130, 196, 0.12)',
-          border: '1px solid var(--signal-blue-dim)',
-          color: 'var(--signal-blue)',
+          background: live ? 'var(--signal-green-bg)' : 'var(--signal-blue-bg)',
+          border: `1px solid ${live ? '#c3e6d3' : '#c9d9f0'}`,
+          color: live ? 'var(--signal-green)' : 'var(--signal-blue)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -47,9 +49,9 @@ export default function AIDetectionBanner() {
           <span className="card__title" style={{ fontSize: 13.5 }}>
             Automatic violation detection
           </span>
-          <span className="badge badge-blue">
+          <span className={`badge ${live ? 'badge-green' : 'badge-blue'}`}>
             <span className="badge-dot" />
-            In development
+            {live ? 'Live' : 'Unavailable'}
           </span>
         </div>
         <div style={{ fontSize: 12.5, color: 'var(--ink-500)', marginBottom: 6 }}>{status.message}</div>

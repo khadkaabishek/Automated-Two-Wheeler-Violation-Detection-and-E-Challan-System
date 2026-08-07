@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import PortalInfoPanel from '../components/PortalInfoPanel';
 
 const EMPTY_FORM = {
   fullName: '',
@@ -38,28 +39,17 @@ export default function Register() {
   };
 
   return (
-    <div className="center-screen" style={{ background: 'var(--page-bg)', padding: '32px 0' }}>
-      <div style={{ width: 460 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, justifyContent: 'center' }}>
-          <div
-            className="sidebar__mark"
-            style={{ width: 42, height: 42, fontSize: 17, background: 'var(--civic-blue-900)', color: '#fff' }}
-          >
-            EC
-          </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--ink-900)' }}>
-              E-Challan
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-500)', letterSpacing: '0.05em' }}>CITIZEN PORTAL</div>
-          </div>
-        </div>
+    <div className="auth-shell">
+      <div className="auth-info-panel">
+        <PortalInfoPanel />
+      </div>
 
-        <div className="card">
-          <div className="card__title" style={{ marginBottom: 4 }}>
+      <div className="auth-form-panel" style={{ overflowY: 'auto', padding: '40px 32px' }}>
+        <div style={{ width: 420 }}>
+          <div className="card__title" style={{ fontSize: 20, marginBottom: 4 }}>
             Create your citizen account
           </div>
-          <div className="card__desc" style={{ marginBottom: 20 }}>
+          <div className="card__desc" style={{ marginBottom: 24 }}>
             One form covers everything — your account and your owner profile — so you can request a
             vehicle registration right away.
           </div>
@@ -145,13 +135,13 @@ export default function Register() {
               {loading ? <span className="spinner" /> : 'Create account'}
             </button>
           </form>
-        </div>
 
-        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--ink-500)' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: 'var(--civic-blue-700)', fontWeight: 600 }}>
-            Sign in
-          </Link>
+          <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--ink-500)' }}>
+            Already have an account?{' '}
+            <Link to="/login" style={{ color: 'var(--civic-blue-700)', fontWeight: 600 }}>
+              Sign in
+            </Link>
+          </div>
         </div>
       </div>
     </div>

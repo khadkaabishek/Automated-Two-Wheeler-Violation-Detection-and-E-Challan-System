@@ -4,24 +4,26 @@ import Topbar from './Topbar';
 
 const TITLES = {
   '/': 'Dashboard',
-  '/challans': 'Challans',
+  '/challans': 'Violations',
+  '/new-violations': 'New Violations',
   '/payments': 'Payments',
   '/reports': 'Reports',
   '/vehicles': 'Vehicles',
   '/owners': 'Vehicle Owners',
-  '/violations': 'Violations',
+  '/violations': 'Violation Types',
   '/users': 'Users',
   '/roles': 'Roles & Permissions',
   '/audit-logs': 'Audit Log',
   '/my-profile': 'My Owner Profile',
   '/officer-application': 'Apply to Serve',
   '/officer-applications': 'Officer Applications',
+  '/disputes': 'Violation Disputes',
 };
 
 function resolveTitle(pathname) {
   if (TITLES[pathname]) return TITLES[pathname];
   const base = '/' + pathname.split('/')[1];
-  return TITLES[base] || 'E-Challan';
+  return TITLES[base] || 'Smart Traffic';
 }
 
 export default function Layout() {

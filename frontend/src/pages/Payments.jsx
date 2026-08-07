@@ -77,7 +77,7 @@ export default function Payments() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!selectedChallan) return toast.error('Select an approved citation');
+    if (!selectedChallan) return toast.error('Select an approved violation');
     setSaving(true);
     try {
       await paymentApi.create({
@@ -100,7 +100,7 @@ export default function Payments() {
     setActionLoading(true);
     try {
       await paymentApi.approve(payment.id);
-      toast.success('Payment approved — citation marked paid');
+      toast.success('Payment approved — violation marked paid');
       load();
     } catch (err) {
       toast.error(err.message);
@@ -137,7 +137,7 @@ export default function Payments() {
           <div className="page-sub">
             {canReview
               ? 'Review and approve or reject citizen-submitted payment requests'
-              : 'Submit a payment request for an approved citation'}
+              : 'Submit a payment request for an approved violation'}
           </div>
         </div>
         {hasPermission('payment:create') && (
@@ -174,7 +174,7 @@ export default function Payments() {
               <thead>
                 <tr>
                   <th>Reference</th>
-                  <th>Citation</th>
+                  <th>Violation</th>
                   <th>Amount</th>
                   <th>Method</th>
                   <th>Status</th>
@@ -229,7 +229,7 @@ export default function Payments() {
       {modalOpen && (
         <Modal title="Submit payment request" onClose={() => setModalOpen(false)}>
           <form onSubmit={handleCreate}>
-            <Field label="Citation (approved only)">
+            <Field label="Violation (approved only)">
               {selectedChallan ? (
                 <div
                   style={{
@@ -253,7 +253,7 @@ export default function Payments() {
                 <div style={{ position: 'relative' }}>
                   <input
                     className="input"
-                    placeholder="Search approved citation number or plate…"
+                    placeholder="Search approved violation number or plate…"
                     value={challanQuery}
                     onChange={(e) => setChallanQuery(e.target.value)}
                   />
@@ -264,7 +264,7 @@ export default function Payments() {
                     >
                       {challanResults.length === 0 && (
                         <div style={{ padding: 8, fontSize: 12, color: 'var(--ink-500)' }}>
-                          No approved citations match
+                          No approved violations match
                         </div>
                       )}
                       {challanResults.map((c) => (
@@ -299,7 +299,7 @@ export default function Payments() {
                 ))}
               </select>
               <span className="field-hint">
-                A traffic officer will review and confirm this request before your citation is marked paid.
+                A traffic officer will review and confirm this request before your violation is marked paid.
               </span>
             </Field>
 

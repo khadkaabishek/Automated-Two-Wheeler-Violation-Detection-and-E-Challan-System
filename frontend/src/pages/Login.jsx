@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import PortalInfoPanel from '../components/PortalInfoPanel';
 
 export default function Login() {
   const { login } = useAuth();
@@ -30,28 +31,17 @@ export default function Login() {
   };
 
   return (
-    <div className="center-screen" style={{ background: 'var(--page-bg)' }}>
-      <div style={{ width: 380 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32, justifyContent: 'center' }}>
-          <div
-            className="sidebar__mark"
-            style={{ width: 42, height: 42, fontSize: 17, background: 'var(--civic-blue-900)', color: '#fff' }}
-          >
-            EC
-          </div>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, color: 'var(--ink-900)' }}>
-              E-Challan
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--ink-500)', letterSpacing: '0.05em' }}>CITIZEN PORTAL</div>
-          </div>
-        </div>
+    <div className="auth-shell">
+      <div className="auth-info-panel">
+        <PortalInfoPanel />
+      </div>
 
-        <div className="card">
-          <div className="card__title" style={{ marginBottom: 4 }}>
+      <div className="auth-form-panel">
+        <div style={{ width: 360 }}>
+          <div className="card__title" style={{ fontSize: 20, marginBottom: 4 }}>
             Sign in
           </div>
-          <div className="card__desc" style={{ marginBottom: 20 }}>
+          <div className="card__desc" style={{ marginBottom: 24 }}>
             Citizens, traffic officers, and administrators all sign in here
           </div>
 
@@ -88,16 +78,16 @@ export default function Login() {
               {loading ? <span className="spinner" /> : 'Sign in'}
             </button>
           </form>
-        </div>
 
-        <div style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--ink-500)' }}>
-          New citizen?{' '}
-          <Link to="/register" style={{ color: 'var(--civic-blue-700)', fontWeight: 600 }}>
-            Create an account
-          </Link>
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: 'var(--ink-300)' }}>
-          Seeded default: superadmin@echallan.gov.np
+          <div style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'var(--ink-500)' }}>
+            New citizen?{' '}
+            <Link to="/register" style={{ color: 'var(--civic-blue-700)', fontWeight: 600 }}>
+              Create an account
+            </Link>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 8, fontSize: 12, color: 'var(--ink-300)' }}>
+            Seeded default: superadmin@smarttraffic.gov.np
+          </div>
         </div>
       </div>
     </div>

@@ -474,3 +474,20 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+// ==========================================================
+// ML MODEL DETECTIONS
+// ==========================================================
+
+model ModelDetection {
+  id            String   @id @default(uuid())
+  plateNumber   String   @map("plate_number")
+  violations    String   // JSON string array of violations
+  snapshotUrl   String   @map("snapshot_url")
+  status        String   @default("PENDING") // PENDING, PROCESSED, DISCARDED
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("model_detections")
+}

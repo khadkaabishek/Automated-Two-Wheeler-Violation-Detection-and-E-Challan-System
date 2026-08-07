@@ -41,7 +41,7 @@ export default function Reports() {
       <div className="page-header">
         <div>
           <div className="page-title">Reports</div>
-          <div className="page-sub">Export citation activity for a period as PDF or Excel</div>
+          <div className="page-sub">Export violation activity for a period as PDF or Excel</div>
         </div>
       </div>
 

@@ -307,6 +307,17 @@
   background: var(--civic-red-100);
 }
 
+/* Solid, filled red — reserved for violation/citation-related primary actions
+   (issuing a challan, disputing one) where the CTA itself should read as
+   consequential, not just another button. */
+.btn-warn {
+  background: var(--civic-red);
+  color: #ffffff;
+}
+.btn-warn:hover:not(:disabled) {
+  background: #a91f2d;
+}
+
 .btn-success {
   background: var(--signal-green);
   color: #ffffff;
@@ -557,6 +568,10 @@ table.dtable {
   max-width: 760px;
 }
 
+.modal--large {
+  max-width: 980px;
+}
+
 .modal__header {
   display: flex;
   align-items: center;
@@ -717,7 +732,7 @@ table.dtable {
   font-family: var(--font-display);
   font-size: 23px;
   font-weight: 700;
-  color: var(--civic-blue-700);
+  color: var(--civic-red);
 }
 
 .ticket__violations {
@@ -734,6 +749,13 @@ table.dtable {
   background: var(--surface-alt);
   border: 1px solid var(--border);
   color: var(--ink-700);
+}
+
+.chip--violation {
+  background: var(--signal-red-bg);
+  border-color: #efc3c8;
+  color: var(--civic-red);
+  font-weight: 600;
 }
 
 /* ============ Misc ============ */
@@ -789,4 +811,33 @@ table.dtable {
 
 .search-input {
   min-width: 240px !important;
+}
+
+/* ============ Auth split-screen (Login/Register) ============ */
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.auth-info-panel {
+  display: block;
+}
+
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: var(--page-bg);
+}
+
+@media (max-width: 860px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+  .auth-info-panel {
+    display: none;
+  }
 }

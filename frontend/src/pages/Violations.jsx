@@ -94,7 +94,7 @@ export default function Violations() {
     <div>
       <div className="page-header">
         <div>
-          <div className="page-title">Violations</div>
+          <div className="page-title">Violation Types</div>
           <div className="page-sub">Violation categories and their fine amounts</div>
         </div>
         {hasPermission('violation:create') && (
@@ -204,7 +204,7 @@ export default function Violations() {
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
               />
-              Active (available when issuing challans)
+              Active (available when issuing violation notices)
             </label>
             <div className="modal__footer">
               <button type="button" className="btn btn-ghost" onClick={() => setModalOpen(false)}>
