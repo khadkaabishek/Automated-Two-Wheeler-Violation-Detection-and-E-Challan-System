@@ -1,0 +1,127 @@
+import nodemailer from 'nodemailer';
+import { env } from '../config/env.js';
+import logger from '../config/logger.js';
+
+let transporter;
+
+const getTransporter = () => {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: env.smtp.host,
+      port: env.smtp.port,
+      secure: env.smtp.secure,
+      auth: env.smtp.user
+        ? {
+            user: env.smtp.user,
+            pass: env.smtp.password,
+          }
+        : undefined,
+    });
+  }
+  return transporter;
+};
+
+/**
+ * Sends an email. In development, if SMTP is not configured, the email
+ * is logged instead of sent, so local auth flows don't break.
+ */
+export const sendEmail = async ({ to, subject, html, text }) => {
+  if (!env.smtp.user || !env.smtp.password) {
+    logger.warn(`SMTP not configured - skipping email send. Would have sent to ${to}: ${subject}`);
+    logger.debug(`Email body: ${text || html}`);
+    return { skipped: true };
+  }
+
+  try {
+    const info = await getTransporter().sendMail({
+      from: `"${env.smtp.fromName}" <${env.smtp.fromEmail}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
+    return info;
+  } catch (err) {
+    logger.error(`Failed to send email to ${to}: ${err.message}`);
+    throw err;
+  }
+};
+
+export const sendPasswordResetEmail = async (to, resetToken, resetUrl) => {
+  const link = `${resetUrl}?token=${resetToken}`;
+  return sendEmail({
+    to,
+    subject: 'Password Reset Request - E-Challan System',
+    html: `<p>You requested a password reset.</p><p>Click <a href="${link}">here</a> to reset your password. This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`,
+    text: `Reset your password: ${link} (expires in 1 hour). If you did not request this, ignore this email.`,
+  });
+};
+
+export const sendEmailVerificationEmail = async (to, verificationToken, verifyUrl) => {
+  const link = `${verifyUrl}?token=${verificationToken}`;
+  return sendEmail({
+    to,
+    subject: 'Welcome to E-Challan - Verify Your Email',
+    html: `<p>Welcome to the E-Challan citizen portal.</p><p>Click <a href="${link}">here</a> to verify your email address.</p>`,
+    text: `Welcome to E-Challan. Verify your email: ${link}`,
+  });
+};
+
+export const sendNewLoginEmail = async (to, { time, ipAddress }) => {
+  return sendEmail({
+    to,
+    subject: 'New sign-in to your E-Challan account',
+    html: `<p>Your E-Challan account was just signed in to.</p><p>Time: ${time}<br/>IP address: ${ipAddress || 'unknown'}</p><p>If this wasn't you, change your password immediately.</p>`,
+    text: `New sign-in to your E-Challan account at ${time} from ${ipAddress || 'unknown'}. If this wasn't you, change your password immediately.`,
+  });
+};
+
+export const sendChallanIssuedEmail = async (to, { challanNumber, vehicleNumber, fineAmount, violations }) => {
+  return sendEmail({
+    to,
+    subject: `New violation notice issued - ${challanNumber}`,
+    html: `<p>A new violation notice has been issued against your vehicle <strong>${vehicleNumber}</strong>.</p><p>Notice number: ${challanNumber}<br/>Violation type(s): ${violations}<br/>Fine amount: Rs ${fineAmount}</p><p>Sign in to the portal to view details once it's approved.</p>`,
+    text: `New violation notice ${challanNumber} issued against vehicle ${vehicleNumber}. Violation type(s): ${violations}. Fine amount: Rs ${fineAmount}.`,
+  });
+};
+
+export const sendChallanApprovedEmail = async (to, { challanNumber, vehicleNumber, fineAmount }) => {
+  return sendEmail({
+    to,
+    subject: `Violation notice approved - ${challanNumber}`,
+    html: `<p>Your violation notice <strong>${challanNumber}</strong> against vehicle ${vehicleNumber} has been approved.</p><p>Fine amount due: Rs ${fineAmount}</p><p>You can now submit a payment request from the portal.</p>`,
+    text: `Violation notice ${challanNumber} against vehicle ${vehicleNumber} approved. Fine amount due: Rs ${fineAmount}. You can now submit a payment request.`,
+  });
+};
+
+export const sendPaymentApprovedEmail = async (to, { challanNumber, amount }) => {
+  return sendEmail({
+    to,
+    subject: `Payment confirmed - ${challanNumber}`,
+    html: `<p>Your payment of <strong>Rs ${amount}</strong> for violation notice ${challanNumber} has been confirmed and it is now marked paid.</p>`,
+    text: `Payment of Rs ${amount} for violation notice ${challanNumber} confirmed. Marked paid.`,
+  });
+};
+
+export const sendPaymentRejectedEmail = async (to, { challanNumber, amount, reason }) => {
+  return sendEmail({
+    to,
+    subject: `Payment not accepted - ${challanNumber}`,
+    html: `<p>Your payment request of Rs ${amount} for violation notice ${challanNumber} was not accepted.</p><p>Reason: ${reason || 'Not specified'}</p><p>Please submit a new payment request from the portal.</p>`,
+    text: `Payment request of Rs ${amount} for violation notice ${challanNumber} was not accepted. Reason: ${reason || 'Not specified'}.`,
+  });
+};
+
+export const sendDisputeResolvedEmail = async (to, { challanNumber, decision, resolutionNote }) => {
+  const upheld = decision === 'UPHELD';
+  return sendEmail({
+    to,
+    subject: `Dispute ${upheld ? 'upheld' : 'dismissed'} - ${challanNumber}`,
+    html: upheld
+      ? `<p>Your dispute for violation notice <strong>${challanNumber}</strong> was upheld — it has been voided.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`
+      : `<p>Your dispute for violation notice <strong>${challanNumber}</strong> was reviewed and dismissed — it stands.</p><p>Reviewer note: ${resolutionNote || 'None provided'}</p>`,
+    text: `Dispute for violation notice ${challanNumber} was ${upheld ? 'upheld — voided' : 'dismissed — stands'}. Reviewer note: ${resolutionNote || 'None provided'}.`,
+  });
+};
+
+export default sendEmail;

@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/mac/Downloads/echallan 9/backend/src/logs/.d82dfb535c7f936412cb72de8ba7b97ec37bc385-audit.json",
+    "files": [
+        {
+            "date": 1786069900403,
+            "name": "/Users/mac/Downloads/echallan 9/backend/src/logs/error-2026-08-07.log",
+            "hash": "8c785abda239b68261d31d4c4e8a9f2a9766bbca83804097b2335482cedfe5a6"
+        }
+    ],
+    "hashType": "sha256"
+}
