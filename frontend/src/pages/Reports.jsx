@@ -10,6 +10,28 @@ const PERIODS = [
 ];
 
 export default function Reports() {
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
+  const [exportFormat, setExportFormat] = useState('PDF');
+
+  const handleDownloadReportPDF = async () => {
+    try {
+      const response = await api.get('/reports/export', {
+        params: { startDate: startDateFilter, endDate: endDateFilter, format: exportFormat },
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `traffic-report-${new Date().toISOString().slice(0, 10)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      toast.error('Failed to export PDF report');
+    }
+  };
   const toast = useToast();
   const [period, setPeriod] = useState('monthly');
   const [useCustom, setUseCustom] = useState(false);
