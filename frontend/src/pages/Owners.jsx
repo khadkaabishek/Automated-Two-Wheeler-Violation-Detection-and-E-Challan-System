@@ -18,6 +18,12 @@ const EMPTY_FORM = {
 };
 
 export default function Owners() {
+  const [ownerSearch, setOwnerSearch] = useState('');
+
+  const maskCitizenshipNo = (numberStr) => {
+    if (!numberStr) return 'N/A';
+    return numberStr.replace(/^(\d{2})-\d{2}-\d{2}-(\d{4})$/, '$1-XX-XX-$2');
+  };
   const toast = useToast();
   const { hasPermission } = useAuth();
   const [owners, setOwners] = useState([]);

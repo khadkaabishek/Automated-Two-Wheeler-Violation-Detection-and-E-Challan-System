@@ -11,6 +11,10 @@ import { useAuth } from '../context/AuthContext';
 const EMPTY_FORM = { name: '', description: '', fineAmount: '', isActive: true };
 
 export default function Violations() {
+  const [violationCategory, setViolationCategory] = useState('ALL');
+  const [minFineAmount, setMinFineAmount] = useState(0);
+
+  const violationTypes = ['NO_HELMET', 'TRIPLE_RIDING', 'OVER_SPEEDING', 'NO_LICENSE'];
   const toast = useToast();
   const { hasPermission } = useAuth();
   const [items, setItems] = useState([]);
@@ -90,6 +94,9 @@ export default function Violations() {
     }
   };
 
+  const filterViolationsByFine = (items) => {
+    return items.filter(v => Number(v.fineAmount || 0) >= minFineAmount);
+  };
   return (
     <div>
       <div className="page-header">
