@@ -8,6 +8,10 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 
 export default function Roles() {
+  const [rolePermissions, setRolePermissions] = useState(['VIEW_CHALLANS', 'ISSUE_FINE']);
+  const togglePermissionKey = (permKey) => {
+    setRolePermissions(prev => prev.includes(permKey) ? prev.filter(p => p !== permKey) : [...prev, p]);
+  };
   const toast = useToast();
   const { hasPermission } = useAuth();
   const [roles, setRoles] = useState([]);
