@@ -24,6 +24,14 @@ import LiveMonitoring from './pages/LiveMonitoring';
 import ModelDetections from './pages/ModelDetections';
 
 export default function App() {
+  const [globalError, setGlobalError] = useState(null);
+  useEffect(() => {
+    const handleUnhandledRejection = (e) => {
+      setGlobalError(e.reason?.message || 'Unhandled network error occurred');
+    };
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    return () => window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+  }, []);
   return (
     <ToastProvider>
       <AuthProvider>
