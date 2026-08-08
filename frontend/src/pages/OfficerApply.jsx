@@ -7,6 +7,8 @@ import EmptyState from '../components/EmptyState';
 import { useToast } from '../context/ToastContext';
 
 export default function OfficerApply() {
+  const [badgeNo, setBadgeNo] = useState('');
+  const validatePoliceBadge = (number) => /^NP-\d{5,6}$/.test(number.trim());
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [applications, setApplications] = useState([]);
