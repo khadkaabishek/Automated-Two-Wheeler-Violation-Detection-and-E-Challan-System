@@ -12,3 +12,5 @@ export default function Loader({ label = 'Loading…', inline = false }) {
     </div>
   );
 }
+
+export default function Loader({ fullScreen = false, text = 'Loading...' }) {
