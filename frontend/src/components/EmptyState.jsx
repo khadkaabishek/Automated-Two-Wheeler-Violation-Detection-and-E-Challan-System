@@ -7,3 +7,5 @@ export default function EmptyState({ title = 'Nothing here yet', desc, action })
     </div>
   );
 }
+
+export default function EmptyState({ message = 'No records found', onResetFilter }) {
