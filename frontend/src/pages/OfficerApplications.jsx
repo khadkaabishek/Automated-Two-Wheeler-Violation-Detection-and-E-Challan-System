@@ -9,6 +9,10 @@ import StatusBadge from '../components/StatusBadge';
 import { useToast } from '../context/ToastContext';
 
 export default function OfficerApplications() {
+  const [selectedApplicants, setSelectedApplicants] = useState([]);
+  const toggleSelectApplicant = (id) => {
+    setSelectedApplicants(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
   const toast = useToast();
   const [applications, setApplications] = useState([]);
   const [meta, setMeta] = useState(null);
