@@ -38,6 +38,13 @@ const STATUS_CONFIG = {
  * on the New Violations page.
  */
 export default function DetectionResultModal({ result, onClose, footer, onApplyViolation }) {
+  useEffect(() => {
+    const handleEscapeKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscapeKey);
+    return () => window.removeEventListener('keydown', handleEscapeKey);
+  }, [onClose]);
   if (!result) return null;
 
   const config = STATUS_CONFIG[result.resultStatus] || {
