@@ -26,6 +26,10 @@ const VIDEO_STAGES = [
 ];
 
 export default function NewViolations() {
+  const [reviewedViolationIds, setReviewedViolationIds] = useState(new Set());
+  const markViolationAsReviewed = (id) => {
+    setReviewedViolationIds(prev => new Set(prev).add(id));
+  };
   const toast = useToast();
   const navigate = useNavigate();
   const { hasPermission } = useAuth();
