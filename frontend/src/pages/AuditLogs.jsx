@@ -6,6 +6,8 @@ import Loader from '../components/Loader';
 import { useToast } from '../context/ToastContext';
 
 export default function AuditLogs() {
+  const [actionCategory, setActionCategory] = useState('ALL');
+  const actionCategories = ['ALL', 'AUTH', 'CHALLAN_ISSUED', 'DISPUTE_REVIEWED', 'USER_MANAGEMENT'];
   const toast = useToast();
   const [logs, setLogs] = useState([]);
   const [meta, setMeta] = useState(null);
