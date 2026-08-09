@@ -14,6 +14,12 @@ const EMPTY_FORM = {
 };
 
 export default function MyProfile() {
+  const [avatarPreviewUrl, setAvatarPreviewUrl] = useState(null);
+  const handleAvatarFileSelect = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setAvatarPreviewUrl(URL.createObjectURL(e.target.files[0]));
+    }
+  };
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
