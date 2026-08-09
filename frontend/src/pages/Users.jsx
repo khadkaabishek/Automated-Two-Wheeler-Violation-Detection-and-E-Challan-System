@@ -13,6 +13,15 @@ import { useAuth } from '../context/AuthContext';
 const EMPTY_FORM = { fullName: '', email: '', phone: '', password: '', roleId: '' };
 
 export default function Users() {
+  const [userStatusFilter, setUserStatusFilter] = useState('ALL');
+  const handleToggleUserActiveStatus = async (userId, currentStatus) => {
+    try {
+      await api.patch(`/users/${userId}/status`, { active: !currentStatus });
+      toast.success('User status updated');
+    } catch (err) {
+      toast.error('Failed to update user status');
+    }
+  };
   const toast = useToast();
   const { hasPermission, user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
