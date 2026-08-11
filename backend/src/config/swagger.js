@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
-    title: 'E-Challan Management System API',
+    title: 'Smart Traffic Management System API',
     version: '1.0.0',
     description:
       'Production-ready backend API for managing e-challans (traffic violation tickets), vehicles, owners, payments, and analytics.',

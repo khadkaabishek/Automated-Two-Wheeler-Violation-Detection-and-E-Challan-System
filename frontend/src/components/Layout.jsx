@@ -22,7 +22,7 @@ const TITLES = {
 function resolveTitle(pathname) {
   if (TITLES[pathname]) return TITLES[pathname];
   const base = '/' + pathname.split('/')[1];
-  return TITLES[base] || 'E-Challan';
+  return TITLES[base] || 'Smart Traffic';
 }
 
 export default function Layout() {

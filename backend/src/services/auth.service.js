@@ -2,8 +2,18 @@ import { v4 as uuidv4 } from 'uuid';
 import userRepository from '../repositories/user.repository.js';
 import refreshTokenRepository from '../repositories/refreshToken.repository.js';
 import roleRepository from '../repositories/role.repository.js';
-import { hashPassword, comparePassword, generateSecureToken, hashToken } from '../utils/password.js';
-import { signAccessToken, signRefreshToken, verifyRefreshToken, expiresInToDate } from '../utils/jwt.js';
+import {
+  hashPassword,
+  comparePassword,
+  generateSecureToken,
+  hashToken,
+} from '../utils/password.js';
+import {
+  signAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+  expiresInToDate,
+} from '../utils/jwt.js';
 import ApiError from '../utils/ApiError.js';
 import { env } from '../config/env.js';
 import { ROLES } from '../constants/roles.js';
@@ -70,7 +80,9 @@ export const register = async (payload, req) => {
     payload.licenseNumber
   );
   if (existingByDocs) {
-    throw ApiError.conflict('An owner profile with this citizenship or license number already exists');
+    throw ApiError.conflict(
+      'An owner profile with this citizenship or license number already exists'
+    );
   }
 
   const user = await prisma.$transaction(async (tx) => {

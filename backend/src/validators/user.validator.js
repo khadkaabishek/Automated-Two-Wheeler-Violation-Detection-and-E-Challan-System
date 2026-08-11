@@ -8,9 +8,7 @@ export const createUserValidator = [
     .trim()
     .matches(/^\+?[0-9]{7,15}$/)
     .withMessage('Phone number must be valid'),
-  body('password')
-    .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters long'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
   body('roleId').isUUID().withMessage('A valid roleId is required'),
   body('status').optional({ checkFalsy: true }).isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
 ];

@@ -6,4 +6,6 @@ export const disputeApi = {
   create: (payload) => api.post('/disputes', payload),
   uphold: (id, resolutionNote) => api.patch(`/disputes/${id}/uphold`, { resolutionNote }),
   dismiss: (id, resolutionNote) => api.patch(`/disputes/${id}/dismiss`, { resolutionNote }),
+  uploadEvidence: (id, formData) => api.postForm(`/disputes/${id}/evidence`, formData),
 };
+

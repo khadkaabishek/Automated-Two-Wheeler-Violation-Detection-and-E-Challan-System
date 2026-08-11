@@ -22,14 +22,15 @@ export const challanRepository = {
           data: {
             challanId: challan.id,
             type: 'IMAGE',
-            url: aiSnapshotUrl
-          }
+            url: aiSnapshotUrl,
+          },
         });
       }
       return tx.challan.findUnique({ where: { id: challan.id }, include: fullInclude });
     }),
 
-  findById: (id) => prisma.challan.findFirst({ where: { id, deletedAt: null }, include: fullInclude }),
+  findById: (id) =>
+    prisma.challan.findFirst({ where: { id, deletedAt: null }, include: fullInclude }),
 
   findByChallanNumber: (challanNumber) =>
     prisma.challan.findFirst({ where: { challanNumber }, include: fullInclude }),

@@ -348,11 +348,26 @@ model ChallanDispute {
 
   challan  Challan @relation(fields: [challanId], references: [id])
   raisedBy User    @relation(fields: [raisedById], references: [id])
+  evidences DisputeEvidence[]
 
   @@index([challanId])
   @@index([raisedById])
   @@index([status])
   @@map("challan_disputes")
+}
+
+// Dispute evidence uploaded by the citizen to support their claim
+model DisputeEvidence {
+  id        String   @id @default(uuid())
+  disputeId String   @map("dispute_id")
+  type      EvidenceType
+  url       String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  dispute ChallanDispute @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+
+  @@index([disputeId])
+  @@map("dispute_evidences")
 }
 
 model ChallanViolation {

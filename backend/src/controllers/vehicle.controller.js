@@ -39,7 +39,12 @@ export const deleteVehicle = asyncHandler(async (req, res) => {
 });
 
 export const setVehicleStatus = asyncHandler(async (req, res) => {
-  const vehicle = await vehicleService.setVehicleStatus(req.params.id, req.body.status, req.user.id, req);
+  const vehicle = await vehicleService.setVehicleStatus(
+    req.params.id,
+    req.body.status,
+    req.user.id,
+    req
+  );
   new ApiResponse(res, 200, 'Vehicle status updated successfully', vehicle);
 });
 

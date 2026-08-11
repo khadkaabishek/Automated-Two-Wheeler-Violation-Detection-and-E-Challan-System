@@ -20,12 +20,19 @@ export const listApplications = asyncHandler(async (req, res) => {
 });
 
 export const getApplication = asyncHandler(async (req, res) => {
-  const application = await officerApplicationService.getApplicationById(req.params.id, scopeFor(req.user));
+  const application = await officerApplicationService.getApplicationById(
+    req.params.id,
+    scopeFor(req.user)
+  );
   new ApiResponse(res, 200, 'Officer application retrieved successfully', application);
 });
 
 export const approveApplication = asyncHandler(async (req, res) => {
-  const application = await officerApplicationService.approveApplication(req.params.id, req.user.id, req);
+  const application = await officerApplicationService.approveApplication(
+    req.params.id,
+    req.user.id,
+    req
+  );
   new ApiResponse(res, 200, 'Application approved — user promoted to Traffic Police', application);
 });
 

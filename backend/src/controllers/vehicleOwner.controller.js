@@ -31,7 +31,12 @@ export const deleteOwner = asyncHandler(async (req, res) => {
 
 export const getMyProfile = asyncHandler(async (req, res) => {
   const owner = await ownerService.getMyProfile(req.user.id);
-  new ApiResponse(res, 200, owner ? 'Profile retrieved successfully' : 'No profile found yet', owner);
+  new ApiResponse(
+    res,
+    200,
+    owner ? 'Profile retrieved successfully' : 'No profile found yet',
+    owner
+  );
 });
 
 export const createMyProfile = asyncHandler(async (req, res) => {

@@ -21,7 +21,7 @@ export default function LiveMonitoring() {
   const [uploading, setUploading] = useState(false);
 
   // ML Processing State
-  const [jobId, setJobId] = useState(null);
+  const [activeJob, setActiveJob] = useState(null);
   const [logs, setLogs] = useState([]);
   const [violationDetected, setViolationDetected] = useState(false);
   const logsEndRef = useRef(null);
@@ -33,15 +33,20 @@ export default function LiveMonitoring() {
   }, [logs]);
 
   useEffect(() => {
-    if (!jobId) return;
+    if (!activeJob?.jobId) return;
 
     const token = tokenStore.getAccess();
-    const source = new EventSource(`${BASE_URL}/ai-detection/stream/${jobId}?token=${token}`);
+    const streamUrl = `${BASE_URL}/ai-detection/stream/${activeJob.jobId}?token=${token}`;
+    const source = new EventSource(streamUrl);
 
     source.addEventListener('log', (e) => {
       try {
         const data = JSON.parse(e.data);
         setLogs(prev => [...prev, data.message]);
+        if (data.message.includes('Process exited')) {
+            setUploading(false);
+            source.close();
+        }
       } catch (err) {}
     });
 
@@ -55,12 +60,20 @@ export default function LiveMonitoring() {
 
     source.addEventListener('close', () => {
       source.close();
+      setUploading(false);
     });
+
+    source.onerror = (err) => {
+      console.error('EventSource failed:', err);
+      source.close();
+      setUploading(false);
+      setLogs(prev => [...prev, '[SYSTEM] Stream disconnected.']);
+    };
 
     return () => {
       source.close();
     };
-  }, [jobId]);
+  }, [activeJob]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -72,19 +85,23 @@ export default function LiveMonitoring() {
     setUploading(true);
     setLogs([]);
     setViolationDetected(false);
-    setJobId(null);
+    setActiveJob(null);
     
     try {
       const formData = new FormData();
-      formData.append('evidenceVideo', videoFile);
+      formData.append('media', videoFile);
 
       const res = await aiDetectionApi.uploadVideo(formData);
-      toast.success(res.message || 'Video uploaded and queued for processing');
-      setJobId(res.jobId);
+      
+      if (res && res.jobId) {
+        toast.success(res.message || 'Media uploaded and queued for processing');
+        setActiveJob({ jobId: res.jobId });
+      } else {
+        throw new Error('No job ID returned');
+      }
       setVideoFile(null);
     } catch (err) {
       toast.error(err.message || 'Failed to upload video');
-    } finally {
       setUploading(false);
     }
   };
@@ -151,14 +168,14 @@ export default function LiveMonitoring() {
           <div className="card">
             <h2 style={{ marginBottom: '1rem', fontSize: '1.25rem' }}>Upload for Testing</h2>
             <p style={{ fontSize: '0.875rem', color: 'var(--ink-500)', marginBottom: '1.5rem' }}>
-              Upload a local video file to pass into the ML models for violation processing.
+              Upload a local video or image file to pass into the ML models for violation processing.
             </p>
             
             <form onSubmit={handleUpload}>
-              <Field label="Video File">
+              <Field label="Media File">
                 <input
                   type="file"
-                  accept="video/mp4,video/mpeg,video/quicktime,video/webm"
+                  accept="image/*,video/*"
                   className="input"
                   onChange={(e) => setVideoFile(e.target.files[0])}
                   disabled={uploading}
@@ -201,18 +218,25 @@ export default function LiveMonitoring() {
             lineHeight: '1.5'
           }}>
             {logs.length === 0 ? (
-              <span style={{ color: '#888' }}>{jobId ? 'Connecting to ML stream...' : 'Waiting for video upload...'}</span>
+              <span style={{ color: '#888' }}>{activeJob?.jobId ? 'Connecting to ML stream...' : 'Waiting for video upload...'}</span>
             ) : (
               logs.map((log, index) => {
                 const isAlert = log.includes('[ALERT]');
-                const isError = log.includes('ERROR:');
+                const isError = log.includes('[ERROR]');
+                const isSystem = log.includes('[SYSTEM]');
+                
+                let textColor = '#00ff00';
+                if (isError) textColor = '#ff5252';
+                else if (isSystem) textColor = '#42a5f5';
+                else if (isAlert) textColor = '#ffeb3b';
+
                 return (
                   <div 
                     key={index} 
                     style={{ 
                       marginBottom: '8px', 
                       wordBreak: 'break-all',
-                      color: isAlert ? '#ffeb3b' : isError ? '#ff5252' : '#00ff00',
+                      color: textColor,
                       fontWeight: isAlert ? 'bold' : 'normal'
                     }}
                   >

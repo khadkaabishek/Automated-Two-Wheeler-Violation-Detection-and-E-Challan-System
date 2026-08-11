@@ -34,7 +34,12 @@ export const createUser = async (payload, actorId, req) => {
     status: payload.status || 'ACTIVE',
   });
 
-  await recordAudit({ userId: actorId, action: 'USER_CREATED', details: { createdUserId: user.id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'USER_CREATED',
+    details: { createdUserId: user.id },
+    req,
+  });
   return sanitizeUser(user);
 };
 
@@ -86,14 +91,24 @@ export const updateUser = async (id, payload, actorId, req) => {
     avatar: payload.avatar,
   });
 
-  await recordAudit({ userId: actorId, action: 'USER_UPDATED', details: { updatedUserId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'USER_UPDATED',
+    details: { updatedUserId: id },
+    req,
+  });
   return sanitizeUser(user);
 };
 
 export const deleteUser = async (id, actorId, req) => {
   await getUserById(id);
   await userRepository.softDelete(id);
-  await recordAudit({ userId: actorId, action: 'USER_DELETED', details: { deletedUserId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'USER_DELETED',
+    details: { deletedUserId: id },
+    req,
+  });
 };
 
 export const setUserStatus = async (id, status, actorId, req) => {

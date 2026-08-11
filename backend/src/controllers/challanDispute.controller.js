@@ -44,3 +44,12 @@ export const dismiss = asyncHandler(async (req, res) => {
   );
   new ApiResponse(res, 200, 'Dispute dismissed — citation stands', dispute);
 });
+
+export const uploadDisputeEvidence = asyncHandler(async (req, res) => {
+  const dispute = await disputeService.addDisputeEvidence(
+    req.params.id,
+    req.files || {},
+    req.user.id
+  );
+  new ApiResponse(res, 200, 'Dispute evidence uploaded successfully', dispute);
+});

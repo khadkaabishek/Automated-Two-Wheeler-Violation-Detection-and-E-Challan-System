@@ -16,7 +16,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT, 10) || 5000,
   apiVersion: process.env.API_VERSION || 'v1',
-  appName: process.env.APP_NAME || 'E-Challan Management System',
+  appName: process.env.APP_NAME || 'Smart Traffic Management System',
   appUrl: process.env.APP_URL || 'http://localhost:5000',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
 
@@ -53,7 +53,7 @@ export const env = {
     secure: process.env.SMTP_SECURE === 'true',
     user: process.env.SMTP_USER,
     password: process.env.SMTP_PASSWORD,
-    fromName: process.env.SMTP_FROM_NAME || 'E-Challan System',
+    fromName: process.env.SMTP_FROM_NAME || 'Smart Traffic System',
     fromEmail: process.env.SMTP_FROM_EMAIL,
   },
 

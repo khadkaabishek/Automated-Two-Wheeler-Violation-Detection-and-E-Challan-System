@@ -11,6 +11,7 @@ import dashboardRoutes from './dashboard.routes.js';
 import reportRoutes from './report.routes.js';
 import auditLogRoutes from './auditLog.routes.js';
 import aiDetectionRoutes from './aiDetection.routes.js';
+import evidenceRoutes from './evidence.routes.js';
 import officerApplicationRoutes from './officerApplication.routes.js';
 import challanDisputeRoutes from './challanDispute.routes.js';
 
@@ -28,6 +29,7 @@ router.use('/dashboard', dashboardRoutes);
 router.use('/reports', reportRoutes);
 router.use('/audit-logs', auditLogRoutes);
 router.use('/ai-detection', aiDetectionRoutes);
+router.use('/evidence', evidenceRoutes);
 router.use('/officer-applications', officerApplicationRoutes);
 router.use('/disputes', challanDisputeRoutes);
 

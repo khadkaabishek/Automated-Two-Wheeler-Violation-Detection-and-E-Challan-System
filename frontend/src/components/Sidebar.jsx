@@ -51,7 +51,7 @@ export default function Sidebar() {
       <div className="sidebar__brand">
         <div className="sidebar__mark">EC</div>
         <div>
-          <div className="sidebar__title">E-Challan</div>
+          <div className="sidebar__title">Smart Traffic</div>
           <div className="sidebar__subtitle">CITIZEN PORTAL</div>
         </div>
       </div>

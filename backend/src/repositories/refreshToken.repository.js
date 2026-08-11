@@ -10,8 +10,7 @@ export const refreshTokenRepository = {
   revokeAllForUser: (userId) =>
     prisma.refreshToken.updateMany({ where: { userId, revoked: false }, data: { revoked: true } }),
 
-  deleteExpired: () =>
-    prisma.refreshToken.deleteMany({ where: { expiresAt: { lt: new Date() } } }),
+  deleteExpired: () => prisma.refreshToken.deleteMany({ where: { expiresAt: { lt: new Date() } } }),
 };
 
 export default refreshTokenRepository;

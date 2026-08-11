@@ -29,7 +29,12 @@ export const refresh = asyncHandler(async (req, res) => {
 
 export const forgotPassword = asyncHandler(async (req, res) => {
   await authService.forgotPassword(req.body.email);
-  new ApiResponse(res, 200, 'If an account with that email exists, a reset link has been sent', null);
+  new ApiResponse(
+    res,
+    200,
+    'If an account with that email exists, a reset link has been sent',
+    null
+  );
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {

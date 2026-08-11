@@ -1,4 +1,4 @@
-# Automated Two-Wheeler Violation Detection and E-Challan System
+# Automated Two-Wheeler Violation Detection and Smart Traffic System
 
 A Minor Project | Bachelor of Engineering in Information Technology
 Nepal College of Information Technology, affiliated to Pokhara University
@@ -40,7 +40,7 @@ The system follows a modular pipeline:
 7. **Violation Processing Engine** – rule-based evaluation of detected events
 8. **Evidence Generation** – compile violation image, timestamp, and metadata
 9. **Data Persistence** – store violation and vehicle records in a central database
-10. **E-Challan Generation** – auto-generate digital fine notices
+10. **Smart Traffic Generation** – auto-generate digital fine notices
 11. **Dashboard & Notifications** – display alerts/analytics and notify vehicle owners
 
 Supporting design artifacts (see project report for diagrams): Use Case Diagram, ER Diagram, Class Diagram, Component Diagram, Sequence Diagram, and System Workflow / Gantt Chart.
@@ -128,8 +128,8 @@ Data split: 70% training / 20% validation / 10% testing, with augmentation (flip
 
 | Member | Responsibility |
 |---|---|
-| Abishek Khadka (231303) |  Machine Learning Development (Dataset Preparation, YOLOv8 Training, Helmet & Triple Riding Detection),Backend Development (E-Challan Generation, System Integration) |
-| Ishbarna Kafle (231317) | Frontend Development (Dashboard UI) Backend Development (API, Database Design, Authentication, E-Challan Generation, System Integration) |
+| Abishek Khadka (231303) |  Machine Learning Development (Dataset Preparation, YOLOv8 Training, Helmet & Triple Riding Detection),Backend Development (Smart Traffic Generation, System Integration) |
+| Ishbarna Kafle (231317) | Frontend Development (Dashboard UI) Backend Development (API, Database Design, Authentication, Smart Traffic Generation, System Integration) |
 | Madan Belbase (231323) | Machine Learning Development (Dataset Preparation, YOLOv8 Training, ANPR & OCR Modules)  Backend Development (API, Database Design, Authentication,)|
 
 ## Expected Outcomes

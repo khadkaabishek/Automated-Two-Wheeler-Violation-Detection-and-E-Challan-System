@@ -17,7 +17,10 @@ export const roleRepository = {
       skip,
       take,
       orderBy,
-      include: { rolePermissions: { include: { permission: true } }, _count: { select: { users: true } } },
+      include: {
+        rolePermissions: { include: { permission: true } },
+        _count: { select: { users: true } },
+      },
     }),
 
   count: (where) => prisma.role.count({ where: { deletedAt: null, ...where } }),

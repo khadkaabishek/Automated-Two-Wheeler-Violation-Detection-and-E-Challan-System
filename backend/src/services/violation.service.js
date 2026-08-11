@@ -9,7 +9,12 @@ export const createViolation = async (payload, actorId, req) => {
     throw ApiError.conflict('A violation with this name already exists');
   }
   const violation = await violationRepository.create(payload);
-  await recordAudit({ userId: actorId, action: 'VIOLATION_CREATED', details: { violationId: violation.id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'VIOLATION_CREATED',
+    details: { violationId: violation.id },
+    req,
+  });
   return violation;
 };
 
@@ -38,12 +43,22 @@ export const getViolationById = async (id) => {
 export const updateViolation = async (id, payload, actorId, req) => {
   await getViolationById(id);
   const violation = await violationRepository.update(id, payload);
-  await recordAudit({ userId: actorId, action: 'VIOLATION_UPDATED', details: { violationId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'VIOLATION_UPDATED',
+    details: { violationId: id },
+    req,
+  });
   return violation;
 };
 
 export const deleteViolation = async (id, actorId, req) => {
   await getViolationById(id);
   await violationRepository.softDelete(id);
-  await recordAudit({ userId: actorId, action: 'VIOLATION_DELETED', details: { violationId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'VIOLATION_DELETED',
+    details: { violationId: id },
+    req,
+  });
 };

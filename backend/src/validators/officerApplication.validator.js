@@ -10,4 +10,6 @@ export const rejectApplicationValidator = [
   body('reason').trim().notEmpty().withMessage('A rejection reason is required'),
 ];
 
-export const applicationIdParamValidator = [param('id').isUUID().withMessage('Invalid application ID')];
+export const applicationIdParamValidator = [
+  param('id').isUUID().withMessage('Invalid application ID'),
+];

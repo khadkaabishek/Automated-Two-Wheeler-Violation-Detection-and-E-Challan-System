@@ -3,7 +3,7 @@ import * as challanController from '../controllers/challan.controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorizePermissions } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
-import { evidenceUpload } from '../middlewares/upload.js';
+import { evidenceUpload, upload } from '../middlewares/upload.js';
 import { PERMISSIONS } from '../constants/permissions.js';
 import {
   createChallanValidator,
@@ -185,6 +185,23 @@ router.post(
   validate,
   evidenceUpload,
   challanController.uploadEvidence
+);
+
+/**
+ * @openapi
+ * /challans/{id}/automated-evidence:
+ *   post:
+ *     tags: [Challans]
+ *     summary: Receive automated violation snapshot from ML model for a specific challan
+ *     security: [{ bearerAuth: [] }]
+ */
+router.post(
+  '/:id/automated-evidence',
+  authorizePermissions(PERMISSIONS.CHALLAN_UPDATE),
+  challanIdParamValidator,
+  validate,
+  upload.single('evidenceImage'),
+  challanController.receiveAutomatedEvidence
 );
 
 export default router;

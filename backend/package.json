@@ -1,7 +1,7 @@
 {
   "name": "e-challan-backend",
   "version": "1.0.0",
-  "description": "Production-ready backend for E-Challan Management System",
+  "description": "Production-ready backend for Smart Traffic Management System",
   "type": "module",
   "main": "src/server.js",
   "engines": {

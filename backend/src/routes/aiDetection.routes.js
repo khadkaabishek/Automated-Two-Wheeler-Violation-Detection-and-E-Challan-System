@@ -44,7 +44,7 @@ router.post(
   '/upload-video',
   authenticate,
   authorizePermissions(PERMISSIONS.LIVE_MONITORING_CREATE),
-  upload.single('evidenceVideo'),
+  upload.single('media'),
   aiDetectionController.uploadVideo
 );
 
@@ -60,8 +60,6 @@ router.post(
  */
 router.post(
   '/automated-violation',
-  authenticate,
-  authorizePermissions(PERMISSIONS.LIVE_MONITORING_CREATE),
   upload.single('evidenceImage'),
   aiDetectionController.receiveAutomatedViolation
 );
@@ -93,7 +91,22 @@ router.patch(
   '/detections/:id',
   authenticate,
   authorizePermissions(PERMISSIONS.LIVE_MONITORING_CREATE),
-  aiDetectionController.updateDetection
+  aiDetectionController.updateDetectionStatus
+);
+
+/**
+ * @openapi
+ * /ai-detection/detections/discard-all:
+ *   post:
+ *     tags: [AI Detection]
+ *     summary: Discard all pending model detections
+ *     security: [{ bearerAuth: [] }]
+ */
+router.post(
+  '/detections/discard-all',
+  authenticate,
+  authorizePermissions(PERMISSIONS.LIVE_MONITORING_CREATE),
+  aiDetectionController.discardAllDetections
 );
 
 export default router;

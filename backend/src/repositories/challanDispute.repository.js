@@ -2,6 +2,7 @@ import prisma from '../config/database.js';
 
 const include = {
   raisedBy: { select: { id: true, fullName: true, email: true } },
+  evidences: true,
   challan: {
     select: {
       id: true,

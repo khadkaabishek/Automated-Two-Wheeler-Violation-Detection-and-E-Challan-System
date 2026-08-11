@@ -29,10 +29,17 @@ export const createPayment = async (payload, actor, req) => {
     throw ApiError.badRequest('Only APPROVED challans can be paid');
   }
   if (Number(payload.amount) !== Number(challan.fineAmount)) {
-    throw ApiError.badRequest(`Payment amount must equal the challan fine amount (${challan.fineAmount})`);
+    throw ApiError.badRequest(
+      `Payment amount must equal the challan fine amount (${challan.fineAmount})`
+    );
   }
 
-  await recordAudit({ userId: actor.id, action: 'PAYMENT_INITIATED', details: { challanId: challan.id }, req });
+  await recordAudit({
+    userId: actor.id,
+    action: 'PAYMENT_INITIATED',
+    details: { challanId: challan.id },
+    req,
+  });
 
   // Still runs through the gateway abstraction so a transaction reference is
   // recorded and unconfigured gateways (eSewa/Khalti/Stripe) still fail
@@ -80,7 +87,10 @@ export const getPaymentById = async (id, actor) => {
   const payment = await paymentRepository.findById(id);
   if (!payment) throw ApiError.notFound('Payment not found');
 
-  if (actor?.roleName === ROLES.VEHICLE_OWNER && payment.challan?.vehicle?.owner?.userId !== actor.id) {
+  if (
+    actor?.roleName === ROLES.VEHICLE_OWNER &&
+    payment.challan?.vehicle?.owner?.userId !== actor.id
+  ) {
     throw ApiError.notFound('Payment not found');
   }
 
@@ -98,13 +108,21 @@ export const approvePayment = async (id, actorId, req) => {
     throw ApiError.badRequest('Only pending payment requests can be approved');
   }
 
-  const updated = await paymentRepository.update(id, { status: 'SUCCESS', paymentDate: new Date() });
+  const updated = await paymentRepository.update(id, {
+    status: 'SUCCESS',
+    paymentDate: new Date(),
+  });
   const challan = await challanRepository.update(payment.challanId, {
     status: 'PAID',
     paymentStatus: 'SUCCESS',
   });
 
-  await recordAudit({ userId: actorId, action: 'PAYMENT_SUCCESS', details: { paymentId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'PAYMENT_SUCCESS',
+    details: { paymentId: id },
+    req,
+  });
   await notifyPaymentApproved(updated, challan);
 
   return updated;
@@ -125,7 +143,12 @@ export const rejectPayment = async (id, reason, actorId, req) => {
   const updated = await paymentRepository.update(id, { status: 'FAILED' });
   const challan = await challanRepository.update(payment.challanId, { paymentStatus: 'FAILED' });
 
-  await recordAudit({ userId: actorId, action: 'PAYMENT_FAILED', details: { paymentId: id, reason }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'PAYMENT_FAILED',
+    details: { paymentId: id, reason },
+    req,
+  });
   await notifyPaymentRejected(updated, challan, reason);
 
   return updated;
@@ -150,11 +173,21 @@ export const confirmPayment = async (transactionId, status, actorId, req) => {
       status: 'PAID',
       paymentStatus: 'SUCCESS',
     });
-    await recordAudit({ userId: actorId, action: 'PAYMENT_SUCCESS', details: { paymentId: payment.id }, req });
+    await recordAudit({
+      userId: actorId,
+      action: 'PAYMENT_SUCCESS',
+      details: { paymentId: payment.id },
+      req,
+    });
     await notifyPaymentApproved(updated, challan);
   } else if (status === 'FAILED') {
     const challan = await challanRepository.update(payment.challanId, { paymentStatus: 'FAILED' });
-    await recordAudit({ userId: actorId, action: 'PAYMENT_FAILED', details: { paymentId: payment.id }, req });
+    await recordAudit({
+      userId: actorId,
+      action: 'PAYMENT_FAILED',
+      details: { paymentId: payment.id },
+      req,
+    });
     await notifyPaymentRejected(updated, challan, 'Gateway reported failure');
   }
 

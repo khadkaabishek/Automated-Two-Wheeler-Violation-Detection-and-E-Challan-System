@@ -71,4 +71,6 @@ export const updateProfileValidator = [
     .withMessage('Phone number must be valid'),
 ];
 
-export const verifyEmailValidator = [body('token').notEmpty().withMessage('Verification token is required')];
+export const verifyEmailValidator = [
+  body('token').notEmpty().withMessage('Verification token is required'),
+];

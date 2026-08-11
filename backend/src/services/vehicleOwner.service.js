@@ -13,7 +13,12 @@ export const createOwner = async (payload, actorId, req) => {
   }
 
   const owner = await vehicleOwnerRepository.create(payload);
-  await recordAudit({ userId: actorId, action: 'OWNER_CREATED', details: { ownerId: owner.id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'OWNER_CREATED',
+    details: { ownerId: owner.id },
+    req,
+  });
   return owner;
 };
 
@@ -84,7 +89,12 @@ export const createMyProfile = async (userId, payload, req) => {
   }
 
   const owner = await vehicleOwnerRepository.create({ ...payload, userId });
-  await recordAudit({ userId, action: 'OWNER_CREATED', details: { ownerId: owner.id, self: true }, req });
+  await recordAudit({
+    userId,
+    action: 'OWNER_CREATED',
+    details: { ownerId: owner.id, self: true },
+    req,
+  });
   return owner;
 };
 
@@ -97,6 +107,11 @@ export const updateMyProfile = async (userId, payload, req) => {
     phone: payload.phone,
     email: payload.email,
   });
-  await recordAudit({ userId, action: 'OWNER_UPDATED', details: { ownerId: owner.id, self: true }, req });
+  await recordAudit({
+    userId,
+    action: 'OWNER_UPDATED',
+    details: { ownerId: owner.id, self: true },
+    req,
+  });
   return updated;
 };

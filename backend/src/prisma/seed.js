@@ -14,19 +14,25 @@ const ROLE_PERMISSION_MAP = {
   [ROLES.TRAFFIC_POLICE]: [
     PERMISSIONS.VEHICLE_READ,
     PERMISSIONS.OWNER_READ,
-    PERMISSIONS.CHALLAN_CREATE, PERMISSIONS.CHALLAN_READ, PERMISSIONS.CHALLAN_UPDATE,
+    PERMISSIONS.CHALLAN_CREATE,
+    PERMISSIONS.CHALLAN_READ,
+    PERMISSIONS.CHALLAN_UPDATE,
     PERMISSIONS.VIOLATION_READ,
     // Traffic Police reviews and approves/rejects citizen-submitted payment requests.
-    PERMISSIONS.PAYMENT_READ, PERMISSIONS.PAYMENT_UPDATE,
+    PERMISSIONS.PAYMENT_READ,
+    PERMISSIONS.PAYMENT_UPDATE,
     PERMISSIONS.DASHBOARD_READ,
-    PERMISSIONS.LIVE_MONITORING_READ, PERMISSIONS.LIVE_MONITORING_CREATE,
+    PERMISSIONS.LIVE_MONITORING_READ,
+    PERMISSIONS.LIVE_MONITORING_CREATE,
   ],
   [ROLES.VEHICLE_OWNER]: [
     // VEHICLE_CREATE lets them self-register a vehicle (always starts PENDING_APPROVAL;
     // service layer forces the owner to be their own linked profile, never someone else's).
-    PERMISSIONS.VEHICLE_CREATE, PERMISSIONS.VEHICLE_READ,
+    PERMISSIONS.VEHICLE_CREATE,
+    PERMISSIONS.VEHICLE_READ,
     PERMISSIONS.CHALLAN_READ,
-    PERMISSIONS.PAYMENT_CREATE, PERMISSIONS.PAYMENT_READ,
+    PERMISSIONS.PAYMENT_CREATE,
+    PERMISSIONS.PAYMENT_READ,
   ],
 };
 
@@ -35,8 +41,16 @@ const DEFAULT_VIOLATIONS = [
   { name: 'Triple Riding', description: 'More than two persons on a two-wheeler', fineAmount: 700 },
   { name: 'Overspeed', description: 'Driving above the posted speed limit', fineAmount: 1500 },
   { name: 'Wrong Parking', description: 'Parking in a no-parking zone', fineAmount: 300 },
-  { name: 'No Seat Belt', description: 'Driver or passenger not wearing a seat belt', fineAmount: 500 },
-  { name: 'Red Light Jump', description: 'Crossing an intersection on a red signal', fineAmount: 2000 },
+  {
+    name: 'No Seat Belt',
+    description: 'Driver or passenger not wearing a seat belt',
+    fineAmount: 500,
+  },
+  {
+    name: 'Red Light Jump',
+    description: 'Crossing an intersection on a red signal',
+    fineAmount: 2000,
+  },
   { name: 'No License', description: 'Driving without a valid license', fineAmount: 3000 },
 ];
 

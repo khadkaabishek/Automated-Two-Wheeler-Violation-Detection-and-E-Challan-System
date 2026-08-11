@@ -43,6 +43,11 @@ export const uploadAvatar = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('Avatar file is required');
   }
   const relativePath = `/uploads/avatars/${req.file.filename}`;
-  const user = await userService.updateUser(req.params.id, { avatar: relativePath }, req.user.id, req);
+  const user = await userService.updateUser(
+    req.params.id,
+    { avatar: relativePath },
+    req.user.id,
+    req
+  );
   new ApiResponse(res, 200, 'Avatar uploaded successfully', user);
 });

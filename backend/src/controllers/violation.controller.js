@@ -18,7 +18,12 @@ export const getViolation = asyncHandler(async (req, res) => {
 });
 
 export const updateViolation = asyncHandler(async (req, res) => {
-  const violation = await violationService.updateViolation(req.params.id, req.body, req.user.id, req);
+  const violation = await violationService.updateViolation(
+    req.params.id,
+    req.body,
+    req.user.id,
+    req
+  );
   new ApiResponse(res, 200, 'Violation updated successfully', violation);
 });
 

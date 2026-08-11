@@ -111,7 +111,12 @@ export const getVehicleById = async (id, actor) => {
 export const updateVehicle = async (id, payload, actorId, req) => {
   await getVehicleById(id);
   const vehicle = await vehicleRepository.update(id, payload);
-  await recordAudit({ userId: actorId, action: 'VEHICLE_UPDATED', details: { vehicleId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'VEHICLE_UPDATED',
+    details: { vehicleId: id },
+    req,
+  });
   return vehicle;
 };
 
@@ -146,5 +151,10 @@ export const rejectRegistration = async (id, actorId, req) => {
 export const deleteVehicle = async (id, actorId, req) => {
   await getVehicleById(id);
   await vehicleRepository.softDelete(id);
-  await recordAudit({ userId: actorId, action: 'VEHICLE_DELETED', details: { vehicleId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'VEHICLE_DELETED',
+    details: { vehicleId: id },
+    req,
+  });
 };

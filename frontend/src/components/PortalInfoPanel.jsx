@@ -29,7 +29,7 @@ export default function PortalInfoPanel() {
           EC
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 21 }}>E-Challan</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 21 }}>Smart Traffic</div>
           <div style={{ fontSize: 11, letterSpacing: '0.06em', opacity: 0.7 }}>CITIZEN PORTAL</div>
         </div>
       </div>

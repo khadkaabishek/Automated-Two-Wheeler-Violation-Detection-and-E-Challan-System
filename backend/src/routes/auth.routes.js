@@ -92,7 +92,13 @@ router.post('/logout', authenticate, refreshTokenValidator, validate, authContro
  *     responses:
  *       200: { description: Reset email sent if account exists }
  */
-router.post('/forgot-password', authLimiter, forgotPasswordValidator, validate, authController.forgotPassword);
+router.post(
+  '/forgot-password',
+  authLimiter,
+  forgotPasswordValidator,
+  validate,
+  authController.forgotPassword
+);
 
 /**
  * @openapi
@@ -103,7 +109,13 @@ router.post('/forgot-password', authLimiter, forgotPasswordValidator, validate, 
  *     responses:
  *       200: { description: Password reset successful }
  */
-router.post('/reset-password', authLimiter, resetPasswordValidator, validate, authController.resetPassword);
+router.post(
+  '/reset-password',
+  authLimiter,
+  resetPasswordValidator,
+  validate,
+  authController.resetPassword
+);
 
 /**
  * @openapi
@@ -151,6 +163,12 @@ router.post(
  *       200: { description: Profile updated }
  */
 router.get('/profile', authenticate, authController.getMe);
-router.patch('/profile', authenticate, updateProfileValidator, validate, authController.updateProfile);
+router.patch(
+  '/profile',
+  authenticate,
+  updateProfileValidator,
+  validate,
+  authController.updateProfile
+);
 
 export default router;

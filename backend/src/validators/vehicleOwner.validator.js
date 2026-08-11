@@ -9,7 +9,12 @@ export const createOwnerValidator = [
     .trim()
     .matches(/^\+?[0-9]{7,15}$/)
     .withMessage('A valid phone number is required'),
-  body('email').optional({ checkFalsy: true }).trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
+  body('email')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isEmail()
+    .withMessage('A valid email is required')
+    .normalizeEmail(),
 ];
 
 export const updateOwnerValidator = [
@@ -21,7 +26,12 @@ export const updateOwnerValidator = [
     .trim()
     .matches(/^\+?[0-9]{7,15}$/)
     .withMessage('A valid phone number is required'),
-  body('email').optional({ checkFalsy: true }).trim().isEmail().withMessage('A valid email is required').normalizeEmail(),
+  body('email')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isEmail()
+    .withMessage('A valid email is required')
+    .normalizeEmail(),
 ];
 
 export const ownerIdParamValidator = [param('id').isUUID().withMessage('Invalid owner ID')];

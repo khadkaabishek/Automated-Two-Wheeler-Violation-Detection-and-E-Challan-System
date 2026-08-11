@@ -51,7 +51,7 @@ export const sendPasswordResetEmail = async (to, resetToken, resetUrl) => {
   const link = `${resetUrl}?token=${resetToken}`;
   return sendEmail({
     to,
-    subject: 'Password Reset Request - E-Challan System',
+    subject: 'Password Reset Request - Smart Traffic System',
     html: `<p>You requested a password reset.</p><p>Click <a href="${link}">here</a> to reset your password. This link expires in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`,
     text: `Reset your password: ${link} (expires in 1 hour). If you did not request this, ignore this email.`,
   });
@@ -61,22 +61,25 @@ export const sendEmailVerificationEmail = async (to, verificationToken, verifyUr
   const link = `${verifyUrl}?token=${verificationToken}`;
   return sendEmail({
     to,
-    subject: 'Welcome to E-Challan - Verify Your Email',
-    html: `<p>Welcome to the E-Challan citizen portal.</p><p>Click <a href="${link}">here</a> to verify your email address.</p>`,
-    text: `Welcome to E-Challan. Verify your email: ${link}`,
+    subject: 'Welcome to Smart Traffic - Verify Your Email',
+    html: `<p>Welcome to the Smart Traffic citizen portal.</p><p>Click <a href="${link}">here</a> to verify your email address.</p>`,
+    text: `Welcome to Smart Traffic. Verify your email: ${link}`,
   });
 };
 
 export const sendNewLoginEmail = async (to, { time, ipAddress }) => {
   return sendEmail({
     to,
-    subject: 'New sign-in to your E-Challan account',
-    html: `<p>Your E-Challan account was just signed in to.</p><p>Time: ${time}<br/>IP address: ${ipAddress || 'unknown'}</p><p>If this wasn't you, change your password immediately.</p>`,
-    text: `New sign-in to your E-Challan account at ${time} from ${ipAddress || 'unknown'}. If this wasn't you, change your password immediately.`,
+    subject: 'New sign-in to your Smart Traffic account',
+    html: `<p>Your Smart Traffic account was just signed in to.</p><p>Time: ${time}<br/>IP address: ${ipAddress || 'unknown'}</p><p>If this wasn't you, change your password immediately.</p>`,
+    text: `New sign-in to your Smart Traffic account at ${time} from ${ipAddress || 'unknown'}. If this wasn't you, change your password immediately.`,
   });
 };
 
-export const sendChallanIssuedEmail = async (to, { challanNumber, vehicleNumber, fineAmount, violations }) => {
+export const sendChallanIssuedEmail = async (
+  to,
+  { challanNumber, vehicleNumber, fineAmount, violations }
+) => {
   return sendEmail({
     to,
     subject: `New citation issued - ${challanNumber}`,
@@ -85,7 +88,10 @@ export const sendChallanIssuedEmail = async (to, { challanNumber, vehicleNumber,
   });
 };
 
-export const sendChallanApprovedEmail = async (to, { challanNumber, vehicleNumber, fineAmount }) => {
+export const sendChallanApprovedEmail = async (
+  to,
+  { challanNumber, vehicleNumber, fineAmount }
+) => {
   return sendEmail({
     to,
     subject: `Citation approved - ${challanNumber}`,

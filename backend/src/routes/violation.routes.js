@@ -37,7 +37,11 @@ router.post(
   validate,
   violationController.createViolation
 );
-router.get('/', authorizePermissions(PERMISSIONS.VIOLATION_READ), violationController.listViolations);
+router.get(
+  '/',
+  authorizePermissions(PERMISSIONS.VIOLATION_READ),
+  violationController.listViolations
+);
 
 /**
  * @openapi

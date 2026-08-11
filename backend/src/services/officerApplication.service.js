@@ -59,7 +59,7 @@ export const getApplicationById = async (id, scopeUserId) => {
   const application = await officerApplicationRepository.findById(id);
   if (!application) throw ApiError.notFound('Officer application not found');
   if (scopeUserId && application.applicantId !== scopeUserId) {
-    throw ApiError.forbidden('You cannot view another user\'s application');
+    throw ApiError.forbidden("You cannot view another user's application");
   }
   return application;
 };
@@ -87,7 +87,11 @@ export const approveApplication = async (id, actorId, req) => {
   await recordAudit({
     userId: actorId,
     action: 'USER_UPDATED',
-    details: { officerApplicationId: id, applicantId: application.applicantId, promotedToOfficer: true },
+    details: {
+      officerApplicationId: id,
+      applicantId: application.applicantId,
+      promotedToOfficer: true,
+    },
     req,
   });
 

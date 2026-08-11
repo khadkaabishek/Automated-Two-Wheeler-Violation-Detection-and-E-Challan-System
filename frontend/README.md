@@ -1,6 +1,6 @@
-# E-Challan Console — Frontend
+# Smart Traffic Console — Frontend
 
-A React admin console for the E-Challan Management System backend: issue and track citations, manage vehicles/owners/violations, process payments, run reports, and administer users/roles — all backed by the real API.
+A React admin console for the Smart Traffic Management System backend: issue and track citations, manage vehicles/owners/violations, process payments, run reports, and administer users/roles — all backed by the real API.
 
 ## Stack
 

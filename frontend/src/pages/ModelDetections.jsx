@@ -46,6 +46,17 @@ export default function ModelDetections() {
     }
   };
 
+  const handleDiscardAll = async () => {
+    if (!window.confirm("Are you sure you want to discard ALL pending detections? This cannot be undone.")) return;
+    try {
+      const res = await aiDetectionApi.discardAll();
+      toast.success(res.message || 'All pending detections discarded');
+      setDetections([]);
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   const handleIssueChallan = (detection) => {
     // Navigate to Challans page and open the Create Modal with this data pre-filled
     navigate('/challans', {
@@ -66,9 +77,16 @@ export default function ModelDetections() {
           <div className="page-title">AI Model Detections</div>
           <div className="page-sub">Review raw detections from the Live Monitoring ML pipeline</div>
         </div>
-        <button className="btn btn-ghost" onClick={fetchDetections}>
-          Refresh
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          {detections.length > 0 && (
+            <button className="btn btn-outline" style={{ borderColor: 'var(--civic-red)', color: 'var(--civic-red)' }} onClick={handleDiscardAll}>
+              Discard All
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={fetchDetections}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {loading && detections.length === 0 ? (

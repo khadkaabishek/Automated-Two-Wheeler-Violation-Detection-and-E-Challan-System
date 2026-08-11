@@ -9,8 +9,7 @@ export const paymentRepository = {
       include: { challan: { include: { vehicle: { include: { owner: true } } } } },
     }),
 
-  findByTransactionId: (transactionId) =>
-    prisma.payment.findUnique({ where: { transactionId } }),
+  findByTransactionId: (transactionId) => prisma.payment.findUnique({ where: { transactionId } }),
 
   findMany: ({ where, skip, take, orderBy }) =>
     prisma.payment.findMany({
@@ -25,8 +24,7 @@ export const paymentRepository = {
 
   update: (id, data) => prisma.payment.update({ where: { id }, data, include: { challan: true } }),
 
-  sumByStatus: (status) =>
-    prisma.payment.aggregate({ where: { status }, _sum: { amount: true } }),
+  sumByStatus: (status) => prisma.payment.aggregate({ where: { status }, _sum: { amount: true } }),
 
   sumBetween: (start, end) =>
     prisma.payment.aggregate({

@@ -3,8 +3,14 @@ import { body, param } from 'express-validator';
 export const createRoleValidator = [
   body('name').trim().notEmpty().withMessage('Role name is required').isLength({ max: 100 }),
   body('description').optional({ checkFalsy: true }).trim().isLength({ max: 500 }),
-  body('permissionIds').optional({ checkFalsy: true }).isArray().withMessage('permissionIds must be an array'),
-  body('permissionIds.*').optional({ checkFalsy: true }).isUUID().withMessage('Each permission ID must be a valid UUID'),
+  body('permissionIds')
+    .optional({ checkFalsy: true })
+    .isArray()
+    .withMessage('permissionIds must be an array'),
+  body('permissionIds.*')
+    .optional({ checkFalsy: true })
+    .isUUID()
+    .withMessage('Each permission ID must be a valid UUID'),
 ];
 
 export const updateRoleValidator = [

@@ -4,7 +4,10 @@ export const vehicleOwnerRepository = {
   create: (data) => prisma.vehicleOwner.create({ data }),
 
   findByUserId: (userId) =>
-    prisma.vehicleOwner.findFirst({ where: { userId, deletedAt: null }, include: { vehicles: true } }),
+    prisma.vehicleOwner.findFirst({
+      where: { userId, deletedAt: null },
+      include: { vehicles: true },
+    }),
 
   findById: (id) =>
     prisma.vehicleOwner.findFirst({
@@ -32,7 +35,8 @@ export const vehicleOwnerRepository = {
 
   update: (id, data) => prisma.vehicleOwner.update({ where: { id }, data }),
 
-  softDelete: (id) => prisma.vehicleOwner.update({ where: { id }, data: { deletedAt: new Date() } }),
+  softDelete: (id) =>
+    prisma.vehicleOwner.update({ where: { id }, data: { deletedAt: new Date() } }),
 };
 
 export default vehicleOwnerRepository;

@@ -37,7 +37,8 @@ const getReportData = async (period, startDate, endDate) => {
     range = { start: new Date(startDate), end: new Date(endDate) };
   } else {
     const resolver = PERIOD_RANGES[period];
-    if (!resolver) throw ApiError.badRequest('Invalid period. Use daily, weekly, monthly, or yearly.');
+    if (!resolver)
+      throw ApiError.badRequest('Invalid period. Use daily, weekly, monthly, or yearly.');
     range = resolver();
   }
 
@@ -52,7 +53,7 @@ export const generateExcelReport = async (period, startDate, endDate) => {
   const { challans, range } = await getReportData(period, startDate, endDate);
 
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'E-Challan Management System';
+  workbook.creator = 'Smart Traffic Management System';
   const sheet = workbook.addWorksheet('Challan Report');
 
   sheet.columns = [
@@ -98,7 +99,7 @@ export const generatePdfReport = async (period, startDate, endDate) => {
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     doc.on('error', reject);
 
-    doc.fontSize(16).text('E-Challan Report', { align: 'center' });
+    doc.fontSize(16).text('Smart Traffic Report', { align: 'center' });
     doc
       .fontSize(10)
       .text(
@@ -108,7 +109,9 @@ export const generatePdfReport = async (period, startDate, endDate) => {
     doc.moveDown();
 
     const totalFine = challans.reduce((sum, c) => sum + Number(c.fineAmount), 0);
-    doc.fontSize(11).text(`Total Challans: ${challans.length}   |   Total Fine Amount: ${totalFine.toFixed(2)}`);
+    doc
+      .fontSize(11)
+      .text(`Total Challans: ${challans.length}   |   Total Fine Amount: ${totalFine.toFixed(2)}`);
     doc.moveDown();
 
     challans.forEach((c, idx) => {

@@ -81,7 +81,11 @@ export const createChallan = async (payload, officerId, req) => {
 
 export const listChallans = async (query, actor) => {
   const { page, limit, skip, take } = getPagination(query);
-  const orderBy = getSorting(query, ['challanNumber', 'fineAmount', 'incidentDate', 'createdAt'], 'createdAt');
+  const orderBy = getSorting(
+    query,
+    ['challanNumber', 'fineAmount', 'incidentDate', 'createdAt'],
+    'createdAt'
+  );
 
   const where = {};
   if (query.search) {
@@ -133,7 +137,12 @@ export const updateChallan = async (id, payload, actorId, req) => {
     description: payload.description,
     address: payload.address,
   });
-  await recordAudit({ userId: actorId, action: 'CHALLAN_UPDATED', details: { challanId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'CHALLAN_UPDATED',
+    details: { challanId: id },
+    req,
+  });
   return updated;
 };
 
@@ -179,16 +188,56 @@ export const transitionChallanStatus = async (id, newStatus, actorId, req) => {
   return updated;
 };
 
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { env } from '../config/env.js';
+import prisma from '../config/database.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export const addEvidence = async (id, files, actorId, req) => {
   await getChallanById(id);
 
   const evidences = [];
-  (files.evidenceImage || []).forEach((f) =>
-    evidences.push({ type: 'IMAGE', url: `/uploads/evidence/images/${f.filename}` })
-  );
-  (files.evidenceVideo || []).forEach((f) =>
-    evidences.push({ type: 'VIDEO', url: `/uploads/evidence/videos/${f.filename}` })
-  );
+
+  if (files.evidenceImage) {
+    for (const f of files.evidenceImage) {
+      const url = `/uploads/evidence/images/${f.filename}`;
+      evidences.push({ type: 'IMAGE', url });
+
+      // Send manual image upload to AI Detections module (with 'UNKNOWN' plate)
+      await prisma.modelDetection.create({
+        data: {
+          plateNumber: 'UNKNOWN',
+          violations: '[]',
+          snapshotUrl: url,
+          status: 'PENDING',
+        },
+      });
+    }
+  }
+
+  if (files?.evidenceVideo) {
+    files.evidenceVideo.forEach((f) => {
+      evidences.push({ type: 'VIDEO', url: `/uploads/${f.filename}` });
+
+      // Spawn ML pipeline for this video
+      const videoPath = f.path;
+      const scriptPath = path.resolve(__dirname, '../../../ML/Code/model_workflow.py');
+      const pythonBin = path.resolve(__dirname, '../../../ML/myvenv/bin/python');
+      const apiUrl = `http://localhost:${env.port}/api/v1/challans/${id}/automated-evidence`;
+      const token = req.headers.authorization?.split(' ')[1] || '';
+
+      console.log(`Spawning ML pipeline for Challan ${id} video evidence...`);
+      const pythonProcess = spawn(pythonBin, [scriptPath, videoPath, apiUrl, token]);
+
+      pythonProcess.stdout.on('data', (data) => console.log(`[Challan ML]: ${data.toString()}`));
+      pythonProcess.stderr.on('data', (data) =>
+        console.error(`[Challan ML Error]: ${data.toString()}`)
+      );
+    });
+  }
 
   if (!evidences.length) {
     throw ApiError.badRequest('No valid evidence files provided');
@@ -208,5 +257,10 @@ export const addEvidence = async (id, files, actorId, req) => {
 export const deleteChallan = async (id, actorId, req) => {
   await getChallanById(id);
   await challanRepository.softDelete(id);
-  await recordAudit({ userId: actorId, action: 'CHALLAN_DELETED', details: { challanId: id }, req });
+  await recordAudit({
+    userId: actorId,
+    action: 'CHALLAN_DELETED',
+    details: { challanId: id },
+    req,
+  });
 };

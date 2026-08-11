@@ -39,6 +39,11 @@ export const approvePayment = asyncHandler(async (req, res) => {
 });
 
 export const rejectPayment = asyncHandler(async (req, res) => {
-  const payment = await paymentService.rejectPayment(req.params.id, req.body.reason, req.user.id, req);
+  const payment = await paymentService.rejectPayment(
+    req.params.id,
+    req.body.reason,
+    req.user.id,
+    req
+  );
   new ApiResponse(res, 200, 'Payment rejected', payment);
 });

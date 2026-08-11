@@ -46,6 +46,9 @@ export default function Challans() {
   const [disputeOpen, setDisputeOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState('');
   const [disputeSaving, setDisputeSaving] = useState(false);
+  const [disputeEvidenceFiles, setDisputeEvidenceFiles] = useState([]);
+  const [disputeEvidenceUploading, setDisputeEvidenceUploading] = useState(false);
+  const [submittedDisputeId, setSubmittedDisputeId] = useState(null);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [violationOptions, setViolationOptions] = useState([]);
@@ -58,6 +61,7 @@ export default function Challans() {
   const [actionLoading, setActionLoading] = useState(false);
   const [evidenceImages, setEvidenceImages] = useState([]);
   const [evidenceVideos, setEvidenceVideos] = useState([]);
+  const [viewImage, setViewImage] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -106,12 +110,18 @@ export default function Challans() {
           .filter(v => prefillData.aiViolations.includes(v.name))
           .map(v => v.id);
           
+        const now = new Date();
+        const localDateStr = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        const localTimeStr = now.toTimeString().slice(0, 5);
+
         setForm(f => ({
           ...f,
           violationIds: matchedViolationIds,
           description: `Automated AI Detection - OCR Plate: ${prefillData.aiPlateNumber}`,
           aiDetectionId: prefillData.aiDetectionId,
           aiSnapshotUrl: prefillData.aiSnapshotUrl,
+          incidentDate: localDateStr,
+          incidentTime: localTimeStr
         }));
       }
     } catch {
@@ -213,14 +223,34 @@ export default function Challans() {
     e.preventDefault();
     setDisputeSaving(true);
     try {
-      await disputeApi.create({ challanId: detailId, reason: disputeReason });
+      const result = await disputeApi.create({ challanId: detailId, reason: disputeReason });
       toast.success('Dispute submitted — a reviewer will respond soon');
-      setDisputeOpen(false);
+      setSubmittedDisputeId(result.id);
       setDisputeReason('');
     } catch (err) {
       toast.error(err.message);
     } finally {
       setDisputeSaving(false);
+    }
+  };
+
+  const uploadDisputeEvidence = async () => {
+    if (disputeEvidenceFiles.length === 0) return toast.error('Choose at least one image or video');
+    setDisputeEvidenceUploading(true);
+    try {
+      const fd = new FormData();
+      disputeEvidenceFiles.forEach(f => fd.append(
+        f.type.startsWith('video') ? 'evidenceVideo' : 'evidenceImage', f
+      ));
+      await disputeApi.uploadEvidence(submittedDisputeId, fd);
+      toast.success('Evidence uploaded — the reviewer will see it');
+      setDisputeEvidenceFiles([]);
+      setSubmittedDisputeId(null);
+      setDisputeOpen(false);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setDisputeEvidenceUploading(false);
     }
   };
 
@@ -462,25 +492,67 @@ export default function Challans() {
                   <div className="card__title" style={{ fontSize: 13, color: 'var(--civic-red)', marginBottom: 10 }}>
                     Dispute this citation
                   </div>
-                  <form onSubmit={submitDispute}>
-                    <Field label="Why do you believe this citation is incorrect?">
-                      <textarea
-                        className="textarea"
-                        required
-                        value={disputeReason}
-                        onChange={(e) => setDisputeReason(e.target.value)}
-                        placeholder="Explain what happened — a traffic officer or admin will review this"
-                      />
-                    </Field>
-                    <div style={{ display: 'flex', gap: 10 }}>
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDisputeOpen(false)}>
-                        Cancel
-                      </button>
-                      <button type="submit" className="btn btn-warn btn-sm" disabled={disputeSaving}>
-                        {disputeSaving ? <span className="spinner" /> : 'Submit dispute'}
-                      </button>
+
+                  {/* Step 1: Write reason */}
+                  {!submittedDisputeId ? (
+                    <form onSubmit={submitDispute}>
+                      <Field label="Why do you believe this citation is incorrect?">
+                        <textarea
+                          className="textarea"
+                          required
+                          value={disputeReason}
+                          onChange={(e) => setDisputeReason(e.target.value)}
+                          placeholder="Explain what happened — a traffic officer or admin will review this"
+                        />
+                      </Field>
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDisputeOpen(false)}>
+                          Cancel
+                        </button>
+                        <button type="submit" className="btn btn-warn btn-sm" disabled={disputeSaving}>
+                          {disputeSaving ? <span className="spinner" /> : 'Submit dispute'}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    /* Step 2: Upload supporting evidence (optional) */
+                    <div>
+                      <div style={{ marginBottom: 12, color: 'var(--ink-600)', fontSize: 14 }}>
+                        ✅ Dispute submitted! You can optionally attach supporting photos or videos to strengthen your claim.
+                      </div>
+                      <Field label="Supporting evidence (images / videos)">
+                        <input
+                          className="input"
+                          type="file"
+                          accept="image/*,video/*"
+                          multiple
+                          onChange={(e) => setDisputeEvidenceFiles(Array.from(e.target.files))}
+                        />
+                      </Field>
+                      {disputeEvidenceFiles.length > 0 && (
+                        <div style={{ marginBottom: 10, fontSize: 13, color: 'var(--ink-500)' }}>
+                          {disputeEvidenceFiles.length} file(s) selected
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 10 }}>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => { setDisputeOpen(false); setSubmittedDisputeId(null); setDisputeEvidenceFiles([]); }}
+                        >
+                          Skip — close
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          disabled={disputeEvidenceUploading || disputeEvidenceFiles.length === 0}
+                          onClick={uploadDisputeEvidence}
+                        >
+                          {disputeEvidenceUploading ? <span className="spinner" /> : 'Upload evidence'}
+                        </button>
+                      </div>
                     </div>
-                  </form>
+                  )}
                 </div>
               )}
 
@@ -489,15 +561,52 @@ export default function Challans() {
                   <div className="ticket__label" style={{ marginBottom: 8 }}>
                     Evidence on file ({detail.evidences.length})
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {detail.evidences.map((ev) => (
-                      <span key={ev.id} className="chip">
-                        {ev.type}
-                      </span>
-                    ))}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                    {detail.evidences.map((ev) => {
+                      const fileUrl = `http://localhost:5001${ev.url}`;
+                      if (ev.type === 'IMAGE' || ev.url.match(/\.(jpg|jpeg|png|webp|bmp)$/i)) {
+                        return (
+                          <div
+                            key={ev.id}
+                            style={{ position: 'relative', cursor: 'pointer', borderRadius: 8, overflow: 'hidden', border: '2px solid var(--ink-200, #e5e7eb)', width: 110, height: 80 }}
+                            onClick={() => setViewImage(fileUrl)}
+                            title="Click to view full image"
+                          >
+                            <img
+                              src={fileUrl}
+                              alt="Evidence"
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                            />
+                            <div style={{ display: 'none', position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', color: '#9ca3af', fontSize: 12, flexDirection: 'column', gap: 4 }}>
+                              <span style={{ fontSize: 20 }}>🖼️</span>
+                              <span>Image</span>
+                            </div>
+                            <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', transition: 'background 0.15s' }}
+                              onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.25)'}
+                              onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0)'}
+                            />
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <a
+                            key={ev.id}
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4, width: 110, height: 80, borderRadius: 8, border: '2px solid var(--ink-200, #e5e7eb)', background: '#f3f4f6', color: '#374151', textDecoration: 'none', fontSize: 12, fontWeight: 500 }}
+                          >
+                            <span style={{ fontSize: 24 }}>🎥</span>
+                            <span>Video</span>
+                          </a>
+                        );
+                      }
+                    })}
                   </div>
                 </div>
               )}
+
 
               {hasPermission('challan:update') && (
                 <div className="card" style={{ marginTop: 16 }}>
@@ -532,6 +641,38 @@ export default function Challans() {
             </>
           )}
         </Modal>
+      )}
+
+      {/* Fullscreen image lightbox */}
+      {viewImage && (
+        <div
+          onClick={() => setViewImage(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.88)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem',
+            cursor: 'zoom-out',
+          }}
+        >
+          <div style={{ position: 'relative', maxWidth: '90vw', maxHeight: '90vh' }} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setViewImage(null)}
+              style={{ position: 'absolute', top: -44, right: 0, background: 'none', border: 'none', color: 'white', fontSize: '2.2rem', cursor: 'pointer', lineHeight: 1 }}
+            >
+              &times;
+            </button>
+            <img
+              src={viewImage}
+              alt="Evidence"
+              style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 10, boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

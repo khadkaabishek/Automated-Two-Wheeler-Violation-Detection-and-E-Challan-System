@@ -5,6 +5,7 @@ import { getPagination, buildPaginationMeta, getSorting } from '../utils/paginat
 import { recordAudit } from './audit.service.js';
 import { notifyDisputeResolved } from './notification.service.js';
 import { ROLES } from '../constants/roles.js';
+import prisma from '../config/database.js';
 
 const DISPUTABLE_STATUSES = ['PENDING', 'APPROVED'];
 
@@ -106,4 +107,48 @@ export const resolveDispute = async (id, decision, resolutionNote, actorId, req)
   await notifyDisputeResolved(updated, fullChallan, decision, resolutionNote);
 
   return updated;
+};
+
+/**
+ * Citizen uploads evidence images/videos to support their dispute.
+ */
+export const addDisputeEvidence = async (disputeId, files, userId) => {
+  const dispute = await challanDisputeRepository.findById(disputeId);
+  if (!dispute) throw ApiError.notFound('Dispute not found');
+
+  // Only the person who raised the dispute can upload evidence
+  if (dispute.raisedById !== userId) {
+    throw ApiError.forbidden('You can only add evidence to your own disputes');
+  }
+
+  if (dispute.status !== 'PENDING') {
+    throw ApiError.badRequest('Evidence can only be added to pending disputes');
+  }
+
+  const evidenceRecords = [];
+  const images = files.evidenceImage || [];
+  const videos = files.evidenceVideo || [];
+
+  for (const file of images) {
+    evidenceRecords.push({
+      disputeId,
+      type: 'IMAGE',
+      url: `/uploads/evidence/images/${file.filename}`,
+    });
+  }
+  for (const file of videos) {
+    evidenceRecords.push({
+      disputeId,
+      type: 'VIDEO',
+      url: `/uploads/evidence/videos/${file.filename}`,
+    });
+  }
+
+  if (evidenceRecords.length === 0) {
+    throw ApiError.badRequest('No files were uploaded');
+  }
+
+  await prisma.disputeEvidence.createMany({ data: evidenceRecords });
+
+  return challanDisputeRepository.findById(disputeId);
 };

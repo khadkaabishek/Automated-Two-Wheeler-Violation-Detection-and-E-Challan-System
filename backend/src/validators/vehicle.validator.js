@@ -12,8 +12,13 @@ export const createVehicleValidator = [
   body('bluebookNumber').trim().notEmpty().withMessage('Bluebook number is required'),
   // Optional: staff supply the owner explicitly; vehicle owners registering their own
   // vehicle have it derived server-side from their linked profile instead.
-  body('ownerId').optional({ checkFalsy: true }).isUUID().withMessage('A valid owner ID is required'),
-  body('status').optional({ checkFalsy: true }).isIn(['PENDING_APPROVAL', 'ACTIVE', 'INACTIVE', 'IMPOUNDED', 'BLACKLISTED']),
+  body('ownerId')
+    .optional({ checkFalsy: true })
+    .isUUID()
+    .withMessage('A valid owner ID is required'),
+  body('status')
+    .optional({ checkFalsy: true })
+    .isIn(['PENDING_APPROVAL', 'ACTIVE', 'INACTIVE', 'IMPOUNDED', 'BLACKLISTED']),
 ];
 
 export const updateVehicleValidator = [

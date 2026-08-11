@@ -28,9 +28,7 @@ export const listRoles = async (query) => {
   const { page, limit, skip, take } = getPagination(query);
   const orderBy = getSorting(query, ['name', 'createdAt'], 'createdAt');
 
-  const where = query.search
-    ? { name: { contains: query.search, mode: 'insensitive' } }
-    : {};
+  const where = query.search ? { name: { contains: query.search, mode: 'insensitive' } } : {};
 
   const [roles, total] = await Promise.all([
     roleRepository.findMany({ where, skip, take, orderBy }),

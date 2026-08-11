@@ -19,9 +19,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // ---- Security & core middleware ----
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 // app.use(
 //   cors({
 //     origin: env.cors.origin,

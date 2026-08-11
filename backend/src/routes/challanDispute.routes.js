@@ -4,6 +4,7 @@ import { authenticate } from '../middlewares/authenticate.js';
 import { authorizePermissions } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
 import { PERMISSIONS } from '../constants/permissions.js';
+import { evidenceUpload } from '../middlewares/upload.js';
 import {
   createDisputeValidator,
   resolveDisputeValidator,
@@ -14,47 +15,21 @@ const router = Router();
 
 router.use(authenticate);
 
-/**
- * @openapi
- * /disputes:
- *   post:
- *     tags: [Disputes]
- *     summary: Dispute a citation issued against your own vehicle ("I didn't do it")
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       201: { description: Dispute submitted }
- *   get:
- *     tags: [Disputes]
- *     summary: List disputes (own only, unless Traffic Police/Super Admin)
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Disputes retrieved }
- */
 router.post('/', createDisputeValidator, validate, disputeController.createDispute);
 router.get('/', disputeController.listDisputes);
 
-/**
- * @openapi
- * /disputes/{id}:
- *   get:
- *     tags: [Disputes]
- *     summary: Get a dispute by ID (own only, unless Traffic Police/Super Admin)
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Dispute retrieved }
- */
 router.get('/:id', disputeIdParamValidator, validate, disputeController.getDispute);
 
 /**
- * @openapi
- * /disputes/{id}/uphold:
- *   patch:
- *     tags: [Disputes]
- *     summary: Uphold a dispute - voids the citation and notifies the owner
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Dispute upheld }
+ * POST /disputes/:id/evidence
+ * Citizen uploads supporting evidence (images / videos) for a pending dispute.
  */
+router.post(
+  '/:id/evidence',
+  evidenceUpload,
+  disputeController.uploadDisputeEvidence
+);
+
 router.patch(
   '/:id/uphold',
   authorizePermissions(PERMISSIONS.CHALLAN_UPDATE),
@@ -63,16 +38,6 @@ router.patch(
   disputeController.uphold
 );
 
-/**
- * @openapi
- * /disputes/{id}/dismiss:
- *   patch:
- *     tags: [Disputes]
- *     summary: Dismiss a dispute - the citation stands, owner is notified
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Dispute dismissed }
- */
 router.patch(
   '/:id/dismiss',
   authorizePermissions(PERMISSIONS.CHALLAN_UPDATE),

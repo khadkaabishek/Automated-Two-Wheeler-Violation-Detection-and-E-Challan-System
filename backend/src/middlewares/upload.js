@@ -34,6 +34,10 @@ const fileFilter = (req, file, cb) => {
     if (!VIDEO_TYPES.includes(file.mimetype)) {
       return cb(ApiError.badRequest('Only mp4, mpeg, mov, or webm videos are allowed'));
     }
+  } else if (file.fieldname === 'media') {
+    if (!IMAGE_TYPES.includes(file.mimetype) && !VIDEO_TYPES.includes(file.mimetype)) {
+      return cb(ApiError.badRequest('Only images or videos are allowed for this field'));
+    }
   } else {
     if (!IMAGE_TYPES.includes(file.mimetype)) {
       return cb(ApiError.badRequest('Only jpeg, jpg, png, or webp images are allowed'));
@@ -42,8 +46,7 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
-const maxSizeBytes =
-  Math.max(env.upload.maxFileSizeMb, env.upload.maxVideoSizeMb) * 1024 * 1024;
+const maxSizeBytes = Math.max(env.upload.maxFileSizeMb, env.upload.maxVideoSizeMb) * 1024 * 1024;
 
 export const upload = multer({
   storage,

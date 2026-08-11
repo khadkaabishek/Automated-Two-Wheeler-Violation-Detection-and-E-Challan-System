@@ -11,7 +11,7 @@ build/
 out/
 .next/
 .nuxt/
-
+.runs/
 # Cache
 .cache/
 .parcel-cache/

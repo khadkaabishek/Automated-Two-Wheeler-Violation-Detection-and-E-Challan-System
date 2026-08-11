@@ -30,7 +30,12 @@ router.use(authenticate);
  *     responses:
  *       200: { description: Applications retrieved }
  */
-router.post('/', createApplicationValidator, validate, officerApplicationController.createApplication);
+router.post(
+  '/',
+  createApplicationValidator,
+  validate,
+  officerApplicationController.createApplication
+);
 router.get('/', officerApplicationController.listApplications);
 
 /**
@@ -43,7 +48,12 @@ router.get('/', officerApplicationController.listApplications);
  *     responses:
  *       200: { description: Application retrieved }
  */
-router.get('/:id', applicationIdParamValidator, validate, officerApplicationController.getApplication);
+router.get(
+  '/:id',
+  applicationIdParamValidator,
+  validate,
+  officerApplicationController.getApplication
+);
 
 /**
  * @openapi
