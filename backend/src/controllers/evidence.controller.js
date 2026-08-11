@@ -5,10 +5,10 @@ import ApiResponse from '../utils/ApiResponse.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Serve evidence files (images or videos)
+// Serve evidence files (images, videos, or payment receipts)
 export const getEvidence = async (req, res) => {
-  const { type, filename } = req.params; // type = images | videos
-  const allowed = ['images', 'videos'];
+  const { type, filename } = req.params; // type = images | videos | receipts
+  const allowed = ['images', 'videos', 'receipts'];
   if (!allowed.includes(type)) {
     return new ApiResponse(res, 400, 'Invalid evidence type');
   }

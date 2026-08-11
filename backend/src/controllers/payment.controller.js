@@ -1,6 +1,7 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import * as paymentService from '../services/payment.service.js';
+import path from 'path';
 
 export const createPayment = asyncHandler(async (req, res) => {
   const payment = await paymentService.createPayment(
@@ -46,4 +47,22 @@ export const rejectPayment = asyncHandler(async (req, res) => {
     req
   );
   new ApiResponse(res, 200, 'Payment rejected', payment);
+});
+
+/**
+ * POST /payments/:id/receipt
+ * Citizen uploads a transaction screenshot/receipt as proof of payment.
+ * Multer saves the file; we just store the relative URL on the payment record.
+ */
+export const uploadPaymentReceipt = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    return new ApiResponse(res, 400, 'No file uploaded');
+  }
+  const relativeUrl = `/uploads/evidence/receipts/${path.basename(req.file.path)}`;
+  const payment = await paymentService.attachReceipt(
+    req.params.id,
+    relativeUrl,
+    { id: req.user.id, roleName: req.user.roleName }
+  );
+  new ApiResponse(res, 200, 'Receipt uploaded successfully', payment);
 });

@@ -409,16 +409,17 @@ model Evidence {
 // ==========================================================
 
 model Payment {
-  id            String        @id @default(uuid())
-  challanId     String        @map("challan_id")
-  amount        Decimal       @db.Decimal(10, 2)
-  paymentMethod PaymentMethod @map("payment_method")
-  transactionId String?       @unique @map("transaction_id")
-  gatewayResponse Json?       @map("gateway_response")
-  paymentDate   DateTime?     @map("payment_date")
-  status        PaymentStatus @default(PENDING)
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
+  id                    String        @id @default(uuid())
+  challanId             String        @map("challan_id")
+  amount                Decimal       @db.Decimal(10, 2)
+  paymentMethod         PaymentMethod @map("payment_method")
+  transactionId         String?       @unique @map("transaction_id")
+  gatewayResponse       Json?         @map("gateway_response")
+  transactionReceiptUrl String?       @map("transaction_receipt_url")
+  paymentDate           DateTime?     @map("payment_date")
+  status                PaymentStatus @default(PENDING)
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
 
   challan Challan @relation(fields: [challanId], references: [id])
 

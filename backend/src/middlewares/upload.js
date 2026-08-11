@@ -16,6 +16,7 @@ const destinationMap = {
   vehicleImage: 'vehicles',
   evidenceImage: path.join('evidence', 'images'),
   evidenceVideo: path.join('evidence', 'videos'),
+  paymentReceipt: path.join('evidence', 'receipts'),
 };
 
 const storage = multer.diskStorage({
@@ -58,5 +59,8 @@ export const evidenceUpload = upload.fields([
   { name: 'evidenceImage', maxCount: 10 },
   { name: 'evidenceVideo', maxCount: 5 },
 ]);
+
+// Single image receipt for payment proof (eSewa / Khalti / Bank / Stripe screenshot)
+export const receiptUpload = upload.single('paymentReceipt');
 
 export default upload;

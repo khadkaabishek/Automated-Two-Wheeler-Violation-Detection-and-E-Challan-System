@@ -4,6 +4,7 @@ import { authenticate } from '../middlewares/authenticate.js';
 import { authorizePermissions } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
 import { PERMISSIONS } from '../constants/permissions.js';
+import { receiptUpload } from '../middlewares/upload.js';
 import {
   createPaymentValidator,
   confirmPaymentValidator,
@@ -39,6 +40,32 @@ router.post(
   paymentController.createPayment
 );
 router.get('/', authorizePermissions(PERMISSIONS.PAYMENT_READ), paymentController.listPayments);
+
+/**
+ * @openapi
+ * /payments/{id}/receipt:
+ *   post:
+ *     tags: [Payments]
+ *     summary: Upload a transaction receipt image as proof of payment
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               paymentReceipt:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200: { description: Receipt uploaded }
+ */
+router.post(
+  '/:id/receipt',
+  authorizePermissions(PERMISSIONS.PAYMENT_CREATE),
+  receiptUpload,
+  paymentController.uploadPaymentReceipt
+);
 
 /**
  * @openapi
@@ -113,3 +140,4 @@ router.patch(
 );
 
 export default router;
+

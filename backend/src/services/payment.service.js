@@ -193,3 +193,26 @@ export const confirmPayment = async (transactionId, status, actorId, req) => {
 
   return updated;
 };
+
+/**
+ * Citizen attaches a payment receipt (screenshot) to their own pending payment request.
+ * Officers can then open it during review before approving/rejecting.
+ */
+export const attachReceipt = async (id, receiptUrl, actor) => {
+  const payment = await paymentRepository.findById(id);
+  if (!payment) throw ApiError.notFound('Payment not found');
+
+  // Only the owner of the payment challan can upload a receipt
+  if (
+    actor.roleName === ROLES.VEHICLE_OWNER &&
+    payment.challan?.vehicle?.owner?.userId !== actor.id
+  ) {
+    throw ApiError.forbidden('You can only attach receipts to your own payments');
+  }
+
+  if (payment.status !== 'PENDING') {
+    throw ApiError.badRequest('Receipts can only be uploaded for pending payments');
+  }
+
+  return paymentRepository.update(id, { transactionReceiptUrl: receiptUrl });
+};
