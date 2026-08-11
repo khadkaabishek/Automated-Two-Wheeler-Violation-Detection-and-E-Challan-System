@@ -49,7 +49,7 @@ export default function AIDetectionBanner() {
           </span>
           <span className="badge badge-blue">
             <span className="badge-dot" />
-            In development
+           Active
           </span>
         </div>
         <div style={{ fontSize: 12.5, color: 'var(--ink-500)', marginBottom: 6 }}>{status.message}</div>

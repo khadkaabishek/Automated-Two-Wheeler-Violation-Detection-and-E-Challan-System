@@ -17,8 +17,7 @@ export const getStatus = asyncHandler(async (req, res) => {
       'Automatic violation detection (ANPR / overspeed / helmet detection) is currently being trained and is not yet issuing challans automatically.',
     plannedCapabilities: [
       'Automatic Number Plate Recognition (ANPR)',
-      'Helmet / seatbelt detection from camera feeds',
-      'Automatic overspeed detection',
+      'Helmet / Triplet detection from camera feeds',
       'Auto-drafted challans for officer review before issuance',
     ],
   });
