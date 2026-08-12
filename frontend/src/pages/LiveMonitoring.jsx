@@ -25,7 +25,7 @@ export default function LiveMonitoring() {
   const [logs, setLogs] = useState([]);
   const [violationDetected, setViolationDetected] = useState(false);
   const logsEndRef = useRef(null);
-
+  const [uploadStatus, setUploadStatus] = useState('idle'); // New state: 'idle', 'uploading', 'uploaded'
   useEffect(() => {
     if (logsEndRef.current) {
       logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -81,7 +81,7 @@ export default function LiveMonitoring() {
       toast.error('Please select a video file first');
       return;
     }
-
+    setUploadStatus('uploading'); 
     setUploading(true);
     setLogs([]);
     setViolationDetected(false);
@@ -96,6 +96,7 @@ export default function LiveMonitoring() {
       if (res && res.jobId) {
         toast.success(res.message || 'Media uploaded and queued for processing');
         setActiveJob({ jobId: res.jobId });
+        setUploadStatus('uploaded'); 
       } else {
         throw new Error('No job ID returned');
       }
@@ -103,6 +104,7 @@ export default function LiveMonitoring() {
     } catch (err) {
       toast.error(err.message || 'Failed to upload video');
       setUploading(false);
+      setUploadStatus('idle');
     }
   };
 
@@ -172,31 +174,33 @@ export default function LiveMonitoring() {
             </p>
             
             <form onSubmit={handleUpload}>
-              <Field label="Media File">
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  className="input"
-                  onChange={(e) => setVideoFile(e.target.files[0])}
-                  disabled={uploading}
-                />
-              </Field>
-              
-              <button 
-                type="submit" 
-                className="btn btn-primary" 
-                style={{ width: '100%', marginTop: '1rem' }}
-                disabled={!videoFile || uploading}
-              >
-                {uploading ? (
-                  <>
-                    <span className="spinner" /> Uploading...
-                  </>
-                ) : (
-                  'Upload & Process'
-                )}
-              </button>
-            </form>
+    <Field label="Media File">
+      <input
+        type="file"
+        accept="image/*,video/*"
+        className="input"
+        onChange={(e) => setVideoFile(e.target.files[0])}
+        disabled={uploadStatus === 'uploading'}
+      />
+    </Field>
+
+    <button
+      type="submit"
+      className="btn btn-primary"
+      style={{ width: '100%', marginTop: '1rem' }}
+      disabled={!videoFile || uploadStatus === 'uploading'}
+    >
+      {uploadStatus === 'uploading' ? (
+        <>
+          <span className="spinner" /> Uploading...
+        </>
+      ) : uploadStatus === 'uploaded' ? (
+        'Uploaded'
+      ) : (
+        'Upload & Process'
+      )}
+    </button>
+  </form>
           </div>
         </div>
 
